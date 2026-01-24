@@ -9,4 +9,10 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  // --- Nuevo Endpoint ---
+  @Get('test-db') 
+  async testDb() {
+    return this.appService.getDbTest();
+  }
 }

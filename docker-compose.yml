@@ -28,6 +28,8 @@ services:
     build: ./backend
     ports:
       - "3000:3000"
+    env_file:                # <--- 1. Agregá esta instrucción
+      - ./backend/.env       # <--- 2. Apuntá al archivo que creaste
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -41,7 +43,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "5173:5173"
+      - "5173:3000"
     depends_on:
       - backend
 

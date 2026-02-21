@@ -9,7 +9,11 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5173
+# Next.js usa el puerto 3000 por defecto
+EXPOSE 3000
 
-# IMPORTANTE: --host es necesario para que Docker exponga la red
-CMD ["npm", "run", "dev", "--", "--host"]
+# Le decimos a Next.js que escuche en todas las interfaces de red de Docker
+ENV HOSTNAME="0.0.0.0"
+
+# El comando limpio para Next.js
+CMD ["npm", "run", "dev"]

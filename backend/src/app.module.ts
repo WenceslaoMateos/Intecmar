@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm'; // <--- Importar esto
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'; // <--- Importar esto
       autoLoadEntities: true, // Carga automática de tus entidades
       synchronize: true,      // ¡IMPORTANTE! Crea las tablas automáticamente (solo para dev)
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

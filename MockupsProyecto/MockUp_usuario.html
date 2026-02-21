@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intecmar - Mi Red</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f3c4c',
+                            teal: '#1a6b7d',
+                            magenta: '#a020f0',
+                            light: '#f4f4f4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; background-color: #f3f2ef; } /* Color de fondo tipo LinkedIn */
+        h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Timeline Styles */
+        .timeline-line {
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e5e7eb;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- TOP NAVBAR -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo & Search -->
+                <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 bg-gradient-to-br from-brand-teal to-brand-magenta rounded flex items-center justify-center text-white font-bold cursor-pointer" onclick="loadView('explorar')">
+                        <i class="fa-solid fa-water text-xs"></i>
+                    </div>
+                    <div class="relative hidden md:block">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        <input type="text" placeholder="Buscar..." class="bg-gray-100 text-sm rounded-md pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-brand-teal transition">
+                    </div>
+                </div>
+
+                <!-- Nav Icons -->
+                <ul class="flex items-center gap-1 sm:gap-6 text-gray-500">
+                    <li class="flex flex-col items-center cursor-pointer group px-2" onclick="loadView('explorar')" id="nav-explorar">
+                        <i class="fas fa-compass text-lg group-hover:text-brand-teal transition"></i>
+                        <span class="text-[10px] hidden sm:block group-hover:text-brand-teal">Explorar</span>
+                    </li>
+                    <li class="flex flex-col items-center cursor-pointer group px-2" onclick="loadView('perfil')" id="nav-perfil">
+                        <i class="fas fa-user-circle text-lg group-hover:text-brand-teal transition"></i>
+                        <span class="text-[10px] hidden sm:block group-hover:text-brand-teal">Mi Perfil</span>
+                    </li>
+                    <li class="flex flex-col items-center cursor-pointer group px-2 border-r border-gray-200 pr-6">
+                        <div class="relative">
+                            <i class="fas fa-bell text-lg group-hover:text-brand-teal transition"></i>
+                            <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                        </div>
+                        <span class="text-[10px] hidden sm:block group-hover:text-brand-teal">Alertas</span>
+                    </li>
+                    <li class="pl-2">
+                        <img src="https://ui-avatars.com/api/?name=Juan+Perez&background=0f3c4c&color=fff" class="w-8 h-8 rounded-full border border-gray-200 cursor-pointer">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-6xl fade-in" id="main-content">
+        <!-- Content injected via JS -->
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATOS MOCK ---
+        const userProjects = [
+            { id: 1, title: "EcoSustrato", role: "Fundador", date: "2025 - Presente", status: "Incubación", desc: "Desarrollo de sustratos ecológicos a partir de residuos de la industria cervecera." },
+            { id: 2, title: "App Deporte Local", role: "Co-Fundador", date: "2023 - 2024", status: "Finalizado", desc: "Plataforma para conectar deportistas amateurs en la ciudad." }
+        ];
+
+        const exploreUsers = [
+            { name: "Lucía Mendez", role: "Investigadora", location: "INTEMA", avatar: "LM" },
+            { name: "Roberto Gomez", role: "Inversor Ángel", location: "Mar del Plata", avatar: "RG" },
+            { name: "Sofía Clara", role: "Estudiante Avanzada", location: "FIE - UNMDP", avatar: "SC" },
+        ];
+        
+        const exploreInstitutions = [
+             { name: "Laboratorio de Open Innovation", type: "Académica", location: "Campus Universitario", icon: "fa-flask" },
+             { name: "Cámara de Software", type: "Cámara", location: "Centro", icon: "fa-laptop-code" }
+        ];
+
+        // --- VISTAS ---
+        const views = {
+            perfil: `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- LEFT COLUMN: Profile Info -->
+                    <div class="lg:col-span-2 space-y-4">
+                        
+                        <!-- Header Profile Card -->
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                            <!-- Banner -->
+                            <div class="h-32 bg-gradient-to-r from-brand-dark to-brand-teal relative">
+                                <button class="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white p-2 rounded-full transition"><i class="fas fa-camera"></i></button>
+                            </div>
+                            
+                            <div class="px-6 pb-6 relative">
+                                <!-- Avatar -->
+                                <div class="relative -mt-16 mb-4">
+                                    <img src="https://ui-avatars.com/api/?name=Juan+Perez&size=128&background=fff&color=0f3c4c" class="w-32 h-32 rounded-full border-4 border-white shadow-md">
+                                </div>
+                                
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h1 class="text-2xl font-bold text-gray-800 font-heading">Juan Pérez</h1>
+                                        <p class="text-gray-600 font-medium">Emprendedor Tecnológico | Desarrollador Full Stack</p>
+                                        <p class="text-gray-400 text-sm mt-1"><i class="fas fa-map-marker-alt mr-1"></i> Mar del Plata, Argentina</p>
+                                    </div>
+                                    <button class="text-brand-teal border border-brand-teal px-4 py-1.5 rounded-full font-bold hover:bg-blue-50 transition text-sm">
+                                        <i class="fas fa-pen mr-1"></i> Editar
+                                    </button>
+                                </div>
+
+                                <div class="mt-4 pt-4 border-t border-gray-100">
+                                    <h3 class="font-bold text-gray-800 text-sm mb-2">Sobre mí</h3>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        Apasionado por crear soluciones tecnológicas con impacto social. Actualmente enfocado en proyectos de economía circular y desarrollo web sostenible. Buscando mentores en el área de finanzas.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Projects Timeline -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-xl font-bold text-gray-800 font-heading">Mis Proyectos</h2>
+                                <button onclick="alert('Modal para crear nuevo proyecto')" class="flex items-center gap-2 text-white bg-brand-magenta hover:bg-purple-700 px-4 py-2 rounded-full text-sm font-bold transition shadow-sm">
+                                    <i class="fas fa-plus"></i> Nuevo Proyecto
+                                </button>
+                            </div>
+
+                            <div class="relative pl-4">
+                                <!-- Vertical Line -->
+                                <div class="timeline-line"></div>
+
+                                <div class="space-y-8">
+                                    ${userProjects.map((proj, index) => `
+                                    <div class="relative pl-8 group">
+                                        <!-- Dot -->
+                                        <div class="absolute left-[13px] top-1 w-3.5 h-3.5 bg-brand-teal rounded-full border-2 border-white shadow z-10"></div>
+                                        
+                                        <!-- Card Content -->
+                                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 hover:shadow-md transition cursor-pointer relative">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <h3 class="font-bold text-brand-teal text-lg">${proj.title}</h3>
+                                                    <p class="text-sm text-gray-500 font-medium mb-2">${proj.role} • ${proj.date}</p>
+                                                </div>
+                                                <span class="bg-brand-light text-gray-600 text-xs px-2 py-1 rounded border border-gray-200">${proj.status}</span>
+                                            </div>
+                                            <p class="text-gray-600 text-sm">${proj.desc}</p>
+                                            
+                                            <div class="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="text-xs text-brand-teal font-bold hover:underline">Ver detalles</button>
+                                                <button class="text-xs text-gray-400 hover:text-brand-danger">Editar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RIGHT COLUMN: Stats & Suggestions -->
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
+                            <h3 class="font-bold text-gray-600 text-sm mb-4">Tu Panel</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">Visualizaciones de perfil</span>
+                                    <span class="text-brand-teal font-bold">42</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">Solicitudes de contacto</span>
+                                    <span class="text-brand-teal font-bold">3</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <a href="#" class="flex items-center gap-2 text-gray-500 text-sm hover:text-gray-800">
+                                    <i class="fas fa-bookmark"></i> Elementos guardados
+                                </a>
+                            </div>
+                        </div>
+
+                         <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200 sticky top-20">
+                            <h3 class="font-bold text-gray-600 text-sm mb-4">Sugerencias para ti</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0"></div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-800">Incubadora UNMDP</p>
+                                        <p class="text-xs text-gray-500 mb-1">Institución</p>
+                                        <button class="text-xs border border-gray-400 rounded-full px-3 py-1 hover:border-gray-600 transition">Seguir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            explorar: `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- Search Header -->
+                    <div class="p-6 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-2xl font-bold text-gray-800 font-heading mb-4">Explorar el Ecosistema</h2>
+                        
+                        <div class="flex gap-2 max-w-2xl">
+                            <div class="relative flex-grow">
+                                <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                                <input type="text" placeholder="Buscar personas, instituciones o proyectos..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-teal shadow-sm">
+                            </div>
+                            <button class="bg-brand-teal text-white px-6 py-3 rounded-lg font-bold hover:bg-brand-dark transition shadow-sm">Buscar</button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex gap-2 mt-4 overflow-x-auto pb-2">
+                            <button onclick="filterExplore('todos')" class="filter-btn active px-4 py-2 rounded-full text-sm font-bold bg-brand-dark text-white shadow transition">Todos</button>
+                            <button onclick="filterExplore('personas')" class="filter-btn px-4 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 transition">Personas</button>
+                            <button onclick="filterExplore('instituciones')" class="filter-btn px-4 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 transition">Instituciones</button>
+                            <button onclick="filterExplore('proyectos')" class="filter-btn px-4 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-300 hover:bg-gray-100 transition">Proyectos</button>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div class="p-6 bg-gray-100 min-h-[400px]">
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">Resultados Destacados</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- User Cards -->
+                            ${exploreUsers.map(user => `
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center text-center hover:shadow-md transition">
+                                <div class="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-gray-600 font-bold text-xl mb-3 border-4 border-white shadow-sm">
+                                    ${user.avatar}
+                                </div>
+                                <h4 class="font-bold text-gray-800 text-lg">${user.name}</h4>
+                                <p class="text-sm text-brand-teal mb-1">${user.role}</p>
+                                <p class="text-xs text-gray-500 mb-4">${user.location}</p>
+                                <button class="mt-auto w-full border border-brand-teal text-brand-teal rounded-full py-1 text-sm font-bold hover:bg-blue-50 transition">Conectar</button>
+                            </div>
+                            `).join('')}
+
+                             <!-- Institution Cards -->
+                            ${exploreInstitutions.map(inst => `
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center text-center hover:shadow-md transition relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-brand-magenta"></div>
+                                <div class="w-16 h-16 bg-purple-50 rounded-lg flex items-center justify-center text-brand-magenta text-2xl mb-3 mt-2">
+                                    <i class="fas ${inst.icon}"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-800 text-lg">${inst.name}</h4>
+                                <p class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 mb-2 mt-1">${inst.type}</p>
+                                <p class="text-xs text-gray-500 mb-4"><i class="fas fa-map-marker-alt mr-1"></i> ${inst.location}</p>
+                                <button class="mt-auto w-full bg-brand-dark text-white rounded-full py-1 text-sm font-bold hover:bg-gray-800 transition">Seguir</button>
+                            </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- NAVEGACIÓN ---
+        function loadView(viewName) {
+            // Update Content
+            const container = document.getElementById('main-content');
+            container.innerHTML = views[viewName];
+            
+            // Re-trigger Animation
+            container.classList.remove('fade-in');
+            void container.offsetWidth;
+            container.classList.add('fade-in');
+
+            // Update Nav Active State (Visual only)
+            document.getElementById('nav-explorar').querySelector('i').className = "fas fa-compass text-lg " + (viewName === 'explorar' ? "text-brand-teal" : "text-gray-500");
+            document.getElementById('nav-explorar').querySelector('span').className = "text-[10px] hidden sm:block " + (viewName === 'explorar' ? "text-brand-teal font-bold" : "text-gray-500");
+            
+            document.getElementById('nav-perfil').querySelector('i').className = "fas fa-user-circle text-lg " + (viewName === 'perfil' ? "text-brand-teal" : "text-gray-500");
+            document.getElementById('nav-perfil').querySelector('span').className = "text-[10px] hidden sm:block " + (viewName === 'perfil' ? "text-brand-teal font-bold" : "text-gray-500");
+        }
+        
+        // Simulación de filtro visual
+        function filterExplore(filter) {
+            // En un caso real, esto filtraría el array `exploreUsers` o `exploreInstitutions`
+            const btns = document.querySelectorAll('.filter-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-brand-dark', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-600');
+            });
+            event.target.classList.remove('bg-white', 'text-gray-600');
+            event.target.classList.add('bg-brand-dark', 'text-white');
+            
+            alert(`Filtrando por: ${filter} (Simulación)`);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadView('perfil'); // Cargar perfil por defecto
+        });
+    </script>
+</body>
+</html>

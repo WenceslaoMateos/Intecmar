@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intecmar - Red de Innovación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f3c4c', // Color aproximado del fondo oscuro
+                            teal: '#1a6b7d',
+                            magenta: '#a020f0', // Tono para el gradiente
+                            light: '#f4f4f4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Open Sans', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Open Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+        
+        /* Simulación de gradiente similar a la imagen */
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(15,60,76,0.95) 0%, rgba(26,107,125,0.8) 50%, rgba(160,32,240,0.4) 100%), url('https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .nav-link.active {
+            color: #1a6b7d;
+            font-weight: 600;
+            border-bottom: 2px solid #1a6b7d;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- HEADER / NAV -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- Logo Placeholder -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('inicio')">
+                <div class="w-10 h-10 bg-gradient-to-br from-brand-teal to-brand-magenta rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <i class="fa-solid fa-water"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-bold text-gray-800 tracking-tight leading-none">intecmar</span>
+                    <span class="text-xs text-gray-500 uppercase tracking-widest">Innovación para emprender</span>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden md:flex space-x-8 items-center">
+                <a href="#" onclick="navigateTo('inicio')" id="nav-inicio" class="nav-link text-gray-600 hover:text-brand-teal transition pb-1">Inicio</a>
+                <a href="#" onclick="navigateTo('nosotros')" id="nav-nosotros" class="nav-link text-gray-600 hover:text-brand-teal transition pb-1">Nosotros</a>
+                <a href="#" onclick="navigateTo('novedades')" id="nav-novedades" class="nav-link text-gray-600 hover:text-brand-teal transition pb-1">Novedades</a>
+                <div class="h-6 w-px bg-gray-300 mx-2"></div> <!-- Separator -->
+                <a href="#" onclick="navigateTo('registro')" id="nav-registro" class="nav-link text-gray-600 hover:text-brand-teal transition pb-1">Registrarme</a>
+                <a href="#" onclick="navigateTo('ingresar')" id="nav-ingresar" class="px-5 py-2 bg-brand-teal text-white rounded-full hover:bg-brand-dark transition shadow-lg shadow-brand-teal/30">Ingresar</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" class="flex-grow">
+        <!-- Content will be injected here via JS -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-dark text-white py-10 mt-auto">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="col-span-1 md:col-span-2">
+                <h3 class="text-xl font-bold mb-4 font-heading">intecmar</h3>
+                <p class="text-gray-300 text-sm leading-relaxed max-w-sm">
+                    Conectando comunidad y tecnología para impulsar la innovación y los emprendimientos del futuro. Una red de apoyo para el desarrollo regional.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-brand-teal">Enlaces Rápidos</h4>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li><a href="#" onclick="navigateTo('inicio')" class="hover:text-white">Inicio</a></li>
+                    <li><a href="#" onclick="navigateTo('nosotros')" class="hover:text-white">Red de Empresas</a></li>
+                    <li><a href="#" onclick="navigateTo('novedades')" class="hover:text-white">Actividades</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-brand-teal">Contacto</h4>
+                <ul class="space-y-2 text-sm text-gray-300">
+                    <li><i class="fas fa-envelope mr-2"></i> contacto@intecmar.edu.ar</li>
+                    <li><i class="fas fa-phone mr-2"></i> +54 223 123 4567</li>
+                    <li><i class="fas fa-map-marker-alt mr-2"></i> Mar del Plata, Argentina</li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-xs text-gray-400">
+            &copy; 2026 Intecmar. Todos los derechos reservados.
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC FOR NAVIGATION -->
+    <script>
+        // --- VISTAS (PÁGINAS) ---
+        const views = {
+            inicio: `
+                <!-- HERO SECTION -->
+                <section class="relative h-[600px] flex items-center hero-gradient fade-in text-white">
+                    <div class="container mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <span class="inline-block py-1 px-3 border border-white/30 rounded-full text-sm mb-4 bg-white/10 backdrop-blur-sm">Red de Innovación</span>
+                            <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6 font-heading">
+                                CONECTANDO <br>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">COMUNIDAD</span> Y <br>
+                                TECNOLOGÍA
+                            </h1>
+                            <p class="text-xl md:text-2xl font-light mb-8 text-gray-200 max-w-lg">
+                                Para impulsar la innovación y emprendimientos del futuro.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <button onclick="navigateTo('registro')" class="px-8 py-4 bg-white text-brand-teal font-bold rounded-lg shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                                    Unirme a la Red
+                                </button>
+                                <button onclick="navigateTo('nosotros')" class="px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-brand-dark transition">
+                                    Conocer más
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Imagen decorativa derecha (opcional, en móvil se oculta o adapta) -->
+                        <div class="hidden lg:block relative">
+                            <!-- SVG Abstracto de "Conexiones" -->
+                            <svg class="w-full h-auto opacity-50" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#A020F0" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.1,-19.2,95.8,-5.3C93.5,8.6,82.2,21.5,70.6,31.4C59,41.3,47.1,48.2,35.5,55.9C23.9,63.6,12.6,72.1,-0.6,73.1C-13.8,74.1,-29.4,67.6,-42.9,59.3C-56.4,51,-67.8,40.9,-75.6,28.3C-83.4,15.7,-87.6,0.6,-84.3,-12.9C-81,-26.4,-70.2,-38.3,-58.4,-46.6C-46.6,-54.9,-33.8,-59.6,-21.3,-68.2C-8.8,-76.8,3.4,-89.3,16.8,-90.4C30.2,-91.5,44.7,-81.2,44.7,-76.4Z" transform="translate(100 100) scale(1.1)" />
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- Wave Divider -->
+                    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+                        <svg class="relative block w-full h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="fill-gray-50"></path>
+                        </svg>
+                    </div>
+                </section>
+
+                <!-- QUE HACEMOS -->
+                <section class="py-20 bg-gray-50">
+                    <div class="container mx-auto px-6">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-4">¿Qué ofrecemos?</h2>
+                            <div class="w-24 h-1 bg-brand-teal mx-auto rounded"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                            <!-- Card 1 -->
+                            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition hover:-translate-y-2 group cursor-pointer">
+                                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-brand-teal transition">
+                                    <i class="fas fa-chalkboard-teacher text-2xl text-brand-teal group-hover:text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3 text-gray-800">Capacitaciones</h3>
+                                <p class="text-gray-600">Accede a cursos, talleres y seminarios diseñados para potenciar tus habilidades emprendedoras.</p>
+                            </div>
+                            <!-- Card 2 -->
+                            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition hover:-translate-y-2 group cursor-pointer">
+                                <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-brand-magenta transition">
+                                    <i class="fas fa-network-wired text-2xl text-brand-magenta group-hover:text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3 text-gray-800">Vinculaciones</h3>
+                                <p class="text-gray-600">Conectamos emprendedores con instituciones, inversores y el sector productivo local.</p>
+                            </div>
+                            <!-- Card 3 -->
+                            <div class="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition hover:-translate-y-2 group cursor-pointer">
+                                <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-green-600 transition">
+                                    <i class="fas fa-lightbulb text-2xl text-green-600 group-hover:text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3 text-gray-800">Incubación</h3>
+                                <p class="text-gray-600">Asistencia técnica y acompañamiento para transformar tu idea en un negocio rentable.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `,
+
+            nosotros: `
+                <div class="bg-white py-16 fade-in">
+                    <div class="container mx-auto px-6">
+                        <!-- Intro -->
+                        <div class="max-w-4xl mx-auto text-center mb-16">
+                            <h2 class="text-4xl font-bold text-gray-800 mb-6 font-heading">Nuestra Identidad</h2>
+                            <p class="text-lg text-gray-600 leading-relaxed">
+                                Somos un ecosistema colaborativo que busca fortalecer la matriz productiva de la región a través de la innovación, la tecnología y el espíritu emprendedor.
+                            </p>
+                        </div>
+
+                        <!-- Mision / Vision -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+                            <div class="bg-gray-50 p-10 rounded-2xl border-l-4 border-brand-teal">
+                                <h3 class="text-2xl font-bold mb-4 text-brand-dark">Nuestra Misión</h3>
+                                <p class="text-gray-600">Fomentar la cultura emprendedora y facilitar herramientas para la creación y consolidación de empresas de base tecnológica y social.</p>
+                            </div>
+                            <div class="bg-gray-50 p-10 rounded-2xl border-l-4 border-brand-magenta">
+                                <h3 class="text-2xl font-bold mb-4 text-brand-dark">Nuestra Visión</h3>
+                                <p class="text-gray-600">Ser el referente regional en articulación público-privada para el desarrollo económico sustentable.</p>
+                            </div>
+                        </div>
+
+                        <!-- Red de Empresas -->
+                        <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">Empresas e Instituciones de la Red</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                            <!-- Mockup de Logos -->
+                            ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `
+                                <div class="flex flex-col items-center group">
+                                    <div class="w-full aspect-square bg-white border border-gray-200 rounded-xl flex items-center justify-center p-6 grayscale group-hover:grayscale-0 transition duration-300 shadow-sm hover:shadow-md">
+                                        <!-- Placeholder SVG Logo -->
+                                        <div class="text-center">
+                                            <i class="fas fa-building text-4xl text-gray-300 group-hover:text-brand-teal mb-2"></i>
+                                            <span class="block font-bold text-gray-700 text-sm">Empresa ${i}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-center mt-2 text-gray-500 opacity-0 group-hover:opacity-100 transition">Desarrollo de Software</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            novedades: `
+                <div class="bg-gray-50 py-12 min-h-screen fade-in">
+                    <div class="container mx-auto px-6">
+                        <div class="flex justify-between items-end mb-10">
+                            <div>
+                                <h2 class="text-3xl font-bold text-gray-800 font-heading">Novedades y Actividades</h2>
+                                <p class="text-gray-500 mt-2">Mantente al día con lo que sucede en el ecosistema.</p>
+                            </div>
+                            <!-- Filtros simualdos -->
+                            <div class="hidden md:flex gap-2">
+                                <button class="px-4 py-2 bg-brand-teal text-white rounded-full text-sm">Todo</button>
+                                <button class="px-4 py-2 bg-white text-gray-600 border hover:bg-gray-100 rounded-full text-sm">Noticias</button>
+                                <button class="px-4 py-2 bg-white text-gray-600 border hover:bg-gray-100 rounded-full text-sm">Convocatorias</button>
+                            </div>
+                        </div>
+
+                        <!-- Infinite Scroll Layout (Simulado) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="news-grid">
+                            <!-- News Item 1 -->
+                            <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
+                                <div class="h-48 bg-gray-200 relative">
+                                    <img src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="News" class="w-full h-full object-cover">
+                                    <span class="absolute top-4 left-4 bg-brand-magenta text-white text-xs font-bold px-3 py-1 rounded-full">Convocatoria</span>
+                                </div>
+                                <div class="p-6 flex-grow flex flex-col">
+                                    <div class="text-gray-400 text-xs mb-2"><i class="far fa-calendar-alt mr-1"></i> 18 Oct 2025</div>
+                                    <h3 class="text-xl font-bold text-gray-800 mb-3 hover:text-brand-teal cursor-pointer">Abierta la inscripción para "Emprender 2026"</h3>
+                                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                        Si tienes una idea de negocio o un proyecto en marcha, no te pierdas esta oportunidad de recibir mentoría especializada y fondos semilla.
+                                    </p>
+                                    <a href="#" class="mt-auto text-brand-teal font-bold text-sm hover:underline">Leer más <i class="fas fa-arrow-right ml-1"></i></a>
+                                </div>
+                            </article>
+
+                            <!-- News Item 2 -->
+                            <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
+                                <div class="h-48 bg-gray-200 relative">
+                                    <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="News" class="w-full h-full object-cover">
+                                    <span class="absolute top-4 left-4 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">Noticia</span>
+                                </div>
+                                <div class="p-6 flex-grow flex flex-col">
+                                    <div class="text-gray-400 text-xs mb-2"><i class="far fa-calendar-alt mr-1"></i> 15 Oct 2025</div>
+                                    <h3 class="text-xl font-bold text-gray-800 mb-3 hover:text-brand-teal cursor-pointer">Nueva alianza estratégica con Universidades</h3>
+                                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                        Firmamos un convenio marco para facilitar el acceso de estudiantes a pasantías en empresas de la red.
+                                    </p>
+                                    <a href="#" class="mt-auto text-brand-teal font-bold text-sm hover:underline">Leer más <i class="fas fa-arrow-right ml-1"></i></a>
+                                </div>
+                            </article>
+                             <!-- News Item 3 -->
+                             <article class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col h-full">
+                                <div class="h-48 bg-gray-200 relative">
+                                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="News" class="w-full h-full object-cover">
+                                    <span class="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">Capacitación</span>
+                                </div>
+                                <div class="p-6 flex-grow flex flex-col">
+                                    <div class="text-gray-400 text-xs mb-2"><i class="far fa-calendar-alt mr-1"></i> 10 Oct 2025</div>
+                                    <h3 class="text-xl font-bold text-gray-800 mb-3 hover:text-brand-teal cursor-pointer">Taller de Marketing Digital para PyMES</h3>
+                                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                        Aprende a gestionar las redes sociales de tu emprendimiento con herramientas profesionales. Cupos limitados.
+                                    </p>
+                                    <a href="#" class="mt-auto text-brand-teal font-bold text-sm hover:underline">Leer más <i class="fas fa-arrow-right ml-1"></i></a>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="text-center mt-12">
+                            <button class="px-8 py-3 bg-transparent border-2 border-brand-teal text-brand-teal font-bold rounded-full hover:bg-brand-teal hover:text-white transition">
+                                Cargar más noticias
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            registro: `
+                <div class="min-h-screen bg-gray-100 py-12 flex justify-center items-center fade-in">
+                    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+                        
+                        <!-- Left Side: Image/Info -->
+                        <div class="w-full md:w-1/3 bg-brand-dark p-12 text-white flex flex-col justify-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                            <h3 class="text-3xl font-bold mb-6 relative z-10">Únete a la Red</h3>
+                            <p class="text-gray-300 mb-6 relative z-10">Al registrarte podrás acceder a contenido exclusivo, postular a convocatorias y conectar con referentes.</p>
+                            <ul class="space-y-3 text-sm text-gray-300 relative z-10">
+                                <li><i class="fas fa-check text-brand-teal mr-2"></i> Acceso a capacitaciones</li>
+                                <li><i class="fas fa-check text-brand-teal mr-2"></i> Perfil profesional</li>
+                                <li><i class="fas fa-check text-brand-teal mr-2"></i> Networking</li>
+                            </ul>
+                        </div>
+
+                        <!-- Right Side: Form -->
+                        <div class="w-full md:w-2/3 p-12">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-8">Crear una cuenta</h2>
+                            
+                            <form onsubmit="event.preventDefault(); alert('En el sistema real, esto enviará los datos al backend Nest.js');">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Nombre</label>
+                                        <input type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="Juan">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Apellido</label>
+                                        <input type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="Pérez">
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico</label>
+                                    <input type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="juan@ejemplo.com">
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Selecciona tu Rol Principal</label>
+                                    <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300 bg-white">
+                                        <option value="" disabled selected>-- Seleccionar --</option>
+                                        <option value="emprendedor">Emprendedor (Tengo una idea/proyecto)</option>
+                                        <option value="empresario">Empresario (Tengo empresa registrada)</option>
+                                        <option value="estudiante">Estudiante</option>
+                                        <option value="docente">Docente / Investigador</option>
+                                        <option value="inversor">Inversor / Mentor</option>
+                                        <option value="referente">Solicitar ser Referente Institucional</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Los roles de Referente Institucional requieren validación del administrador.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                                        <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="********">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-700 text-sm font-bold mb-2">Confirmar Contraseña</label>
+                                        <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="********">
+                                    </div>
+                                </div>
+
+                                <button class="w-full bg-brand-teal text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-dark transition transform active:scale-95 shadow-lg">
+                                    Registrarse
+                                </button>
+                                
+                                <p class="text-center mt-6 text-sm text-gray-600">
+                                    ¿Ya tienes cuenta? <a href="#" onclick="navigateTo('ingresar')" class="text-brand-teal font-bold hover:underline">Ingresa aquí</a>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            ingresar: `
+                <div class="min-h-screen bg-gray-100 flex justify-center items-center fade-in">
+                    <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md">
+                        <div class="text-center mb-8">
+                             <div class="w-12 h-12 bg-gradient-to-br from-brand-teal to-brand-magenta rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
+                                <i class="fa-solid fa-water"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800">Bienvenido de nuevo</h2>
+                            <p class="text-gray-500 text-sm">Ingresa a tu panel de gestión</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); alert('Redirigiendo al Dashboard (Parte 2 del sistema)...');">
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-envelope text-gray-400"></i>
+                                    </div>
+                                    <input type="email" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="tu@email.com">
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-lock text-gray-400"></i>
+                                    </div>
+                                    <input type="password" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" placeholder="********">
+                                </div>
+                                <div class="text-right mt-2">
+                                    <a href="#" class="text-xs text-brand-teal hover:underline">¿Olvidaste tu contraseña?</a>
+                                </div>
+                            </div>
+
+                            <button class="w-full bg-brand-dark text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition transform active:scale-95 shadow-md mb-4">
+                                Ingresar
+                            </button>
+                        </form>
+                        
+                         <div class="relative flex py-2 items-center">
+                            <div class="flex-grow border-t border-gray-300"></div>
+                            <span class="flex-shrink mx-4 text-gray-400 text-xs">O</span>
+                            <div class="flex-grow border-t border-gray-300"></div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <p class="text-sm text-gray-600">¿No tienes cuenta? <a href="#" onclick="navigateTo('registro')" class="text-brand-teal font-bold hover:underline">Regístrate</a></p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- FUNCIÓN DE NAVEGACIÓN ---
+        function navigateTo(pageId) {
+            const main = document.getElementById('main-content');
+            
+            // 1. Inyectar HTML
+            main.innerHTML = views[pageId] || views['inicio'];
+            
+            // 2. Scroll al top
+            window.scrollTo(0, 0);
+
+            // 3. Actualizar estado activo en el menú
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const activeLink = document.getElementById(`nav-${pageId}`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar página de inicio por defecto
+            navigateTo('inicio');
+        });
+    </script>
+</body>
+</html>

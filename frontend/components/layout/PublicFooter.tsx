@@ -23,7 +23,7 @@ export const PublicFooter = () => {
             </li>
             <li>
               <Link href="/nosotros" className="hover:text-white transition">
-                Red de Empresas
+                Red de Instituciones
               </Link>
             </li>
             <li>

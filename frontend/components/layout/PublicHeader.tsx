@@ -5,7 +5,7 @@ export const PublicHeader = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         
-        {/* Logo Placeholder - Ahora es un Link que lleva a la raíz "/" */}
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <div className="w-10 h-10 bg-gradient-to-br from-brand-teal to-brand-magenta rounded-lg flex items-center justify-center text-white font-bold text-xl">
             <i className="fa-solid fa-water"></i>
@@ -16,7 +16,7 @@ export const PublicHeader = () => {
           </div>
         </Link>
 
-        {/* Desktop Menu - Reemplazamos <a> por <Link> */}
+        {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 items-center">
           <Link href="/" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1">
             Inicio

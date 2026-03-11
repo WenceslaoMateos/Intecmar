@@ -1,5 +1,5 @@
-import { Header } from '@/components/layout/PublicHeader';
-import { Footer } from '@/components/layout/PublicFooter';
+import { PublicHeader } from '@/components/layout/PublicHeader';
+import { PublicFooter } from '@/components/layout/PublicFooter';
 
 export default function PublicLayout({
   children,
@@ -9,11 +9,11 @@ export default function PublicLayout({
   return (
     // El flex-col y min-h-screen empujan el footer siempre hacia abajo
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header /> 
+      <PublicHeader /> 
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }

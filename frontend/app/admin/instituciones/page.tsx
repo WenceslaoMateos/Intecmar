@@ -105,34 +105,12 @@ export default function InstitucionesPage() {
       {institutions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {institutions.map(inst => (
-            <div key={inst.id} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col h-full relative group justify-between hover:shadow-md transition duration-300">
-              
-              {/* Botones de acción (Aparecen al hacer hover) */}
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition duration-300 bg-white/90 px-2 py-1 rounded-lg backdrop-blur-sm shadow-sm border border-gray-100">
-                {/* NUEVO BOTÓN: Ver Detalles (Ojito) */}
-                <button 
-                  onClick={() => setSelectedInstitution(inst)}
-                  className="text-gray-400 hover:text-brand-magenta mx-1.5 transition"
-                  title="Ver Detalles"
-                >
-                  <i className="fas fa-eye"></i>
-                </button>
-                <button 
-                  onClick={() => handleEdit(inst.name)}
-                  className="text-gray-400 hover:text-brand-teal mx-1.5 transition"
-                  title="Editar Institución"
-                >
-                  <i className="fas fa-edit"></i>
-                </button>
-                <button 
-                  onClick={() => handleDelete(inst.name, inst.id)}
-                  className="text-gray-400 hover:text-brand-danger mx-1.5 transition"
-                  title="Eliminar Institución"
-                >
-                  <i className="fas fa-trash"></i>
-                </button>
-              </div>
-              
+            <div 
+              key={inst.id} 
+              onClick={() => setSelectedInstitution(inst)}
+              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col h-full relative group justify-between hover:shadow-md transition duration-300 cursor-pointer"
+            >
+                            
               {/* Contenido de la tarjeta */}
               <div>
                 <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center mb-4 text-gray-400 group-hover:text-brand-teal group-hover:bg-blue-50 transition">
@@ -268,7 +246,13 @@ export default function InstitucionesPage() {
                 onClick={() => setSelectedInstitution(null)}
                 className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition"
               >
-                Cerrar
+                Cancelar
+              </button>
+              <button 
+                onClick={() => handleDelete(selectedInstitution.name, selectedInstitution.id)}
+                className="px-6 py-2.5 bg-white border border-red-200 text-brand-danger text-sm font-bold rounded-lg hover:bg-red-50 transition flex items-center justify-center"
+              >
+                <i className="fas fa-trash mr-2"></i> Eliminar Institución
               </button>
               <button 
                 onClick={() => {

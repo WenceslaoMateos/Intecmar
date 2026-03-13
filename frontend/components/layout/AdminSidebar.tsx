@@ -36,9 +36,6 @@ export const AdminSidebar = () => {
           />
           <div>
             <h4 className="text-white text-sm font-bold">Administrador</h4>
-            <span className="text-xs text-brand-success flex items-center gap-1">
-              <i className="fas fa-circle text-[8px]"></i> En línea
-            </span>
           </div>
         </div>
       </div>
@@ -48,7 +45,7 @@ export const AdminSidebar = () => {
         <ul className="space-y-1">
           <li>
             <Link 
-              href="/admin/dashboard" 
+              href="/admin" 
               className={`flex items-center px-6 py-3 text-sm ${getActiveClasses('/admin/dashboard')}`}
             >
               <i className="fas fa-tachometer-alt w-6"></i>

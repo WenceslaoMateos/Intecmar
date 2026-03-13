@@ -26,18 +26,6 @@ export const AdminHeader = () => {
         {getPageTitle()}
       </h2>
       
-      {/* Acciones del lado derecho (Campanita) */}
-      <div className="flex items-center gap-4">
-        <button 
-          className="text-gray-500 hover:text-brand-teal relative transition"
-          onClick={() => alert('¡No tienes notificaciones nuevas!')}
-        >
-          <i className="fas fa-bell text-xl"></i>
-          {/* Puntito rojo de notificación */}
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-danger rounded-full border-2 border-white"></span>
-        </button>
-      </div>
-      
     </header>
   );
 };

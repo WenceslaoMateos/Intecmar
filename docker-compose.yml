@@ -39,11 +39,18 @@ services:
     depends_on:
       - db
 
-  # Servicio Frontend (React)
+  # Servicio Frontend (Next.js)
   frontend:
     build: ./frontend
     ports:
       - "5173:3000"
+    volumes:
+      # Sincroniza tu carpeta local ./frontend con /usr/src/app en el contenedor
+      - ./frontend:/usr/src/app
+      
+      # Protegemos las carpetas clave para que no se pisen con las de tu PC
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
     depends_on:
       - backend
 

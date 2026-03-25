@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image'; 
 
 export const PublicFooter = () => {
   return (
@@ -6,8 +7,19 @@ export const PublicFooter = () => {
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Logo y descripción */}
         <div className="col-span-1 md:col-span-2">
-          <h3 className="text-xl font-bold mb-4 font-heading">intecmar</h3>
-          <p className="text-gray-300 text-sm leading-relaxed max-w-sm">
+          
+          {/* Logo Blanco */}
+          <Link href="/" className="inline-block mb-4">
+            <Image 
+              src="/intecmar-blanco.png" 
+              alt="Logo Intecmar"
+              width={160} 
+              height={45}
+              className="object-contain min-w-[111px]" // Mantiene la proporción y respeta el manual
+            />
+          </Link>
+          
+          <p className="text-gray-300 text-sm leading-relaxed max-w-sm mt-2">
             Conectando comunidad y tecnología para impulsar la innovación y los emprendimientos del futuro. Una red de apoyo para el desarrollo regional.
           </p>
         </div>

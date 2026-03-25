@@ -1,39 +1,41 @@
 import Link from 'next/link';
+import Image from 'next/image'; 
 
 export const PublicHeader = () => {
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-6 py-2 flex justify-between items-center">
         
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
-          <div className="w-10 h-10 bg-gradient-to-br from-brand-teal to-brand-magenta rounded-lg flex items-center justify-center text-white font-bold text-xl">
-            <i className="fa-solid fa-water"></i>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold text-gray-800 tracking-tight leading-none font-heading">intecmar</span>
-            <span className="text-xs text-gray-500 uppercase tracking-widest">Innovación para emprender</span>
-          </div>
+        <Link href="/" className="flex items-center cursor-pointer">
+          <Image 
+            src="/red-intecmar.png" 
+            alt="Logo de Red Intecmar"
+            width={180} 
+            height={48} 
+            priority 
+            className="object-contain min-w-[111px]" // Mantiene la proporción y asegura el ancho mínimo
+          />
         </Link>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex space-x-8 items-center">
-          <Link href="/" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1">
+          <Link href="/" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1 font-medium">
             Inicio
           </Link>
-          <Link href="/nosotros" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1">
+          <Link href="/nosotros" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1 font-medium">
             Nosotros
           </Link>
-          <Link href="/novedades" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1">
+          <Link href="/novedades" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1 font-medium">
             Novedades
           </Link>
           
-          <div className="h-6 w-px bg-gray-300 mx-2"></div> {/* Separator */}
+          <div className="h-6 w-px bg-gray-300 mx-2"></div> {/* Separador */}
           
-          <Link href="/registro" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1">
+          <Link href="/registro" className="nav-link text-gray-600 hover:text-brand-teal transition pb-1 font-medium">
             Registrarme
           </Link>
-          <Link href="/ingresar" className="px-5 py-2 bg-brand-teal text-white rounded-full hover:bg-brand-dark transition shadow-lg shadow-brand-teal/30">
+          <Link href="/ingresar" className="px-5 py-2 bg-brand-teal text-white rounded-full hover:bg-brand-blue transition shadow-lg shadow-brand-teal/30 font-semibold text-sm">
             Ingresar
           </Link>
         </nav>

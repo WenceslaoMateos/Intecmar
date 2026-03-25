@@ -1,30 +1,50 @@
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap');
-
 @import "tailwindcss";
 
 @theme {
-  --color-brand-dark: #0f3c4c;
-  --color-brand-teal: #1a6b7d;
-  --color-brand-magenta: #a020f0;
+  /* --- COLORES DEL MANUAL DE IDENTIDAD --- */
+  --color-brand-blue: #2B68B0;
+  --color-brand-teal: #64BDA5;
+  --color-brand-magenta: #B82560;
+  --color-brand-gray: #616160;
+  
+  /* --- MAPEOS --- */
+  --color-brand-dark: #2B68B0;
   --color-brand-light: #f4f4f4;
+
+  /* --- COLORES DE ESTADO --- */
   --color-brand-success: #10B981;
   --color-brand-danger: #EF4444;
   --color-brand-warning: #F59E0B;
 
-  --font-sans: 'Open Sans', sans-serif;
-  --font-heading: 'Montserrat', sans-serif;
+  /* --- FUENTES --- */
+  --font-sans: "Inter", sans-serif;
+  /*
+  --font-heading: "Montserrat", sans-serif;
+  */
 }
 
+body {
+  background-color: #f3f2ef; /* Fondo gris */
+}
+
+/* ==========================================================
+   CLASES DE UTILIDAD PERSONALIZADAS
+========================================================== */
 .fade-in {
-  animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* DEGRADADO DEL MANUAL DE IDENTIDAD */
+.bg-gradient-brand {
+  background: linear-gradient(90deg, #2B68B0 0%, #64BDA5 50%, #B82560 100%);
+}
+
+/* Línea de tiempo para el perfil */
 .timeline-line {
   position: absolute;
   left: 20px;

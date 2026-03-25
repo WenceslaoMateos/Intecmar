@@ -1,4 +1,4 @@
-'use client'; // Le decimos a Next.js que este componente usa interactividad en el navegador (por el formulario)
+'use client'; // este componente usa interactividad en el navegador (por el formulario)
 
 import Link from 'next/link';
 
@@ -11,15 +11,11 @@ export default function IngresarPage() {
   };
 
   return (
-    // Reemplazamos min-h-screen por py-16 para que se adapte bien al espacio entre el Header y el Footer
     <div className="bg-gray-100 flex justify-center items-center py-16 px-4 fade-in">
       <div className="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-md">
         
         {/* Título y Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-brand-teal to-brand-magenta rounded-lg flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
-            <i className="fa-solid fa-water"></i>
-          </div>
           <h2 className="text-2xl font-bold text-gray-800">Bienvenido de nuevo</h2>
           <p className="text-gray-500 text-sm">Ingresa a tu panel de gestión</p>
         </div>

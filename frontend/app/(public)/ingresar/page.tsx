@@ -1,13 +1,57 @@
-'use client'; // este componente usa interactividad en el navegador (por el formulario)
+'use client'; 
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function IngresarPage() {
+  const router = useRouter();
   
-  // Función temporal para simular el login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue al enviar el formulario
-    alert('En el futuro (Fase 2), esto enviará tu email y contraseña a Nest.js para entrar al sistema.');
+  // Estados para capturar los datos del formulario y manejar errores/carga
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Función asíncrona para manejar el login real
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); 
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // 1. Petición real al backend de Nest.js (Ahora apunta al puerto 3000 de tu Docker)
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Credenciales incorrectas o usuario no registrado.');
+      }
+
+      const data = await response.json();
+      
+      // 2. Extraemos el token del backend (Asumiendo que Nest.js devuelve { access_token: "..." })
+      const token = data.access_token; 
+
+      // 3. ACTUALIZAMOS LAS COOKIES: Esto es lo que lee tu proxy.ts en el Canvas
+      // Le decimos que aplica a toda la página (path=/) y dura 1 día (max-age=86400)
+      document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Strict`;
+
+      // 4. Redirigimos al panel protegido. ¡El proxy ahora nos dejará pasar!
+      router.push('/perfil');
+      
+    } catch (err: any) {
+      setError(err.message || 'Error al conectar con el servidor.');
+      
+      
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -20,6 +64,14 @@ export default function IngresarPage() {
           <p className="text-gray-500 text-sm">Ingresa a tu panel de gestión</p>
         </div>
 
+        {/* Mensaje de Error (Si lo hay) */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded mb-6 text-sm flex items-center">
+            <i className="fas fa-exclamation-circle mr-2"></i>
+            {error}
+          </div>
+        )}
+
         {/* Formulario */}
         <form onSubmit={handleLogin}>
           <div className="mb-6">
@@ -30,7 +82,9 @@ export default function IngresarPage() {
               </div>
               <input 
                 type="email" 
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300 transition" 
                 placeholder="tu@email.com"
                 required 
               />
@@ -45,7 +99,9 @@ export default function IngresarPage() {
               </div>
               <input 
                 type="password" 
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300 transition" 
                 placeholder="********"
                 required 
               />
@@ -59,9 +115,14 @@ export default function IngresarPage() {
 
           <button 
             type="submit" 
-            className="w-full bg-brand-dark text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition transform active:scale-95 shadow-md mb-4"
+            disabled={isLoading}
+            className="w-full bg-brand-dark text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800 transition transform active:scale-95 shadow-md mb-4 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
           >
-            Ingresar
+            {isLoading ? (
+              <><i className="fas fa-circle-notch fa-spin mr-2"></i> Ingresando...</>
+            ) : (
+              'Ingresar'
+            )}
           </button>
         </form>
         
@@ -76,7 +137,6 @@ export default function IngresarPage() {
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
             ¿No tienes cuenta?{' '}
-            {/* El link real hacia la página de registro */}
             <Link href="/registro" className="text-brand-teal font-bold hover:underline">
               Regístrate
             </Link>

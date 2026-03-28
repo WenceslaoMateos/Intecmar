@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // 1. Buscamos el token de sesión (que tu backend Nest.js generó) en las cookies
   const token = request.cookies.get('auth_token')?.value;
 

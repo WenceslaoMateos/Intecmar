@@ -1,15 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // <-- 1. Agregamos useRouter
 
 export const UserNavbar = () => {
   const pathname = usePathname();
+  const router = useRouter(); // <-- 2. Inicializamos el router
 
   // Función para determinar si el link está activo (para pintar el ícono y texto)
   const isActive = (path: string) => {
     // Retorna true si la ruta actual coincide con el path que le pasamos
     return pathname === path;
+  };
+
+  // 3. Función REAL para cerrar sesión
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault(); // Evitamos que el navegador intente ir a otra página
+    
+    // Destruimos la cookie poniéndole una fecha de vencimiento en el pasado
+    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    
+    // Redirigimos al usuario a la página de ingreso
+    router.push('/ingresar');
   };
 
   return (
@@ -71,17 +83,17 @@ export const UserNavbar = () => {
 
             {/* Botón de Cerrar Sesión */}
             <li className="pl-2 sm:pl-4 border-l border-gray-200 ml-1">
-              <Link 
-                href="/" 
-                onClick={() => alert('Cerrando sesión de usuario...')}
-                className="flex flex-col items-center group px-2"
+              <a 
+                href="#" 
+                onClick={handleLogout}
+                className="flex flex-col items-center group px-2 cursor-pointer"
                 title="Cerrar sesión"
               >
                 <i className="fas fa-sign-out-alt text-lg text-gray-400 group-hover:text-brand-danger transition"></i>
                 <span className="text-[10px] hidden sm:block mt-1 text-gray-400 group-hover:text-brand-danger transition">
                   Salir
                 </span>
-              </Link>
+              </a>
             </li>
 
           </ul>

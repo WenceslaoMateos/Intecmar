@@ -1,35 +1,35 @@
-CREATE TABLE User
+CREATE TABLE `User`
 (
     id_user INT AUTO_INCREMENT,
     email varchar(255) not null,
-    password varchar(255) not null,
+    `password` varchar(255) not null,
     firstName varchar(100) not null,
     lastName varchar(100) not null,
     birthDate date not null,
 
     PRIMARY KEY (id_user)
-)
+);
 
-create table Role(
+CREATE TABLE `Role`(
     id_role INT AUTO_INCREMENT,
-    name varchar(100),
-    public boolean default TRUE
+    `name` varchar(100),
+    public boolean default TRUE,
 
     PRIMARY KEY (id_role)
-)
+);
 
-create table UsersXRol(
+CREATE TABLE UsersXRol(
     id_usersxrole INT AUTO_INCREMENT,
     id_user int not null,
     id_role int not null,
 
     PRIMARY KEY (id_usersxrole),
-    FOREIGN KEY(id_user) REFERENCES Categoria(id_user),
-    FOREIGN KEY(id_role) REFERENCES Categoria(id_role),
-)
+    FOREIGN KEY(id_user) REFERENCES `User`(id_user),
+    FOREIGN KEY(id_role) REFERENCES `Role`(id_role)
+);
 
-insert into Role(name, public)
-values 
+INSERT INTO `Role`(`name`, public)
+VALUES 
 ('Administrador', FALSE),
 ('Emprendedor/a Incipiente', TRUE),
 ('Emprendedor/a con empresa en marcha', TRUE),
@@ -44,4 +44,4 @@ values
 ('Inversor/a', TRUE),
 ('Jurado', TRUE),
 ('Referente Institucional', TRUE),
-('Evaluador/a', TRUE)
+('Evaluador/a', TRUE);

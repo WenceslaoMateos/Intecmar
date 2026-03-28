@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -11,31 +11,31 @@ export class AuthService {
   ) {}
 
   // NUEVO: Método para registrar un usuario
-  async register(usuario: string, pass: string) {
-    const existe = await this.usersService.findOneByUsername(usuario);
+  async register(email: string, password: string) {
+    const existe = await this.usersService.findOneByUsername(email);
     if (existe) throw new ConflictException('El usuario ya existe');
 
     // Encriptamos la contraseña (10 rondas es el estándar seguro)
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(pass, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const newUser = await this.usersService.create({
-      username: usuario,
+      email: email,
       password: hashedPassword,
     });
 
-    return { mensaje: '¡Usuario creado!', id: newUser.id };
+    return { mensaje: '¡Usuario creado!', id: newUser.id_user };
   }
 
   // ACTUALIZADO: Método de login real
-  async login(usuario: string, pass: string) {
-    const user = await this.usersService.findOneByUsername(usuario);
+  async login(email: string, password: string) {
+    const user = await this.usersService.findOneByUsername(email);
     if (!user) throw new UnauthorizedException('Credenciales incorrectas');
 
-    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) throw new UnauthorizedException('Credenciales incorrectas');
 
-    const payload = { sub: user.id, username: user.username };
+    const payload = { sub: user.id_user, email: user.email };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 }

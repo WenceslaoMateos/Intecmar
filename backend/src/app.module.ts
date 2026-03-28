@@ -15,6 +15,8 @@ import { AuthModule } from './auth/auth.module';
       database: 'tesis_db',   // <--- El que pusiste en docker-compose
       autoLoadEntities: true, // Carga automática de tus entidades
       synchronize: true,      // ¡IMPORTANTE! Crea las tablas automáticamente (solo para dev)
+      retryAttempts: 10,
+      retryDelay: 3000, // Espera 3 segundos entre cada intento
     }),
     AuthModule,
   ],

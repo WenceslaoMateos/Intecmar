@@ -30,6 +30,12 @@ CREATE TABLE UsersXRol(
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
 
+insert into User(email, `password`)
+values 
+('wenceslaomateos@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
+('paulabonifazi@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
+('nahuel@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O');
+
 INSERT INTO `Role`(`name`, public)
 VALUES 
 ('Administrador', FALSE),
@@ -48,8 +54,6 @@ VALUES
 ('Referente Institucional', TRUE),
 ('Evaluador/a', TRUE);
 
-/************************************************************************************************************************************************************/
-/************************************************************************************************************************************************************/
 
 DELIMITER $$
 

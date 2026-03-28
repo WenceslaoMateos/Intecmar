@@ -24,7 +24,8 @@ export class AuthService {
       console.error('Hubo un problema al acceder a la Base de Datos');
       throw error;
     }
-    if (exists) throw new ConflictException('El usuario ya existe');
+
+    if (exists[0].length != 0) throw new ConflictException('El usuario ya existe');
 
     // Encriptamos la contraseña (10 rondas es el estándar seguro)
     const saltRounds = 10;
@@ -62,12 +63,14 @@ export class AuthService {
       throw error;
     }
 
-    if (!userData) throw new UnauthorizedException('Credenciales incorrectas');
+    if (userData[0].length == 0) throw new UnauthorizedException('Credenciales incorrectas');
 
-    const isPasswordValid = await bcrypt.compare(user.password, userData.password);
+    const userFound = userData[0][0];
+
+    const isPasswordValid = await bcrypt.compare(user.password, userFound.password);
     if (!isPasswordValid) throw new UnauthorizedException('Credenciales incorrectas');
 
-    const payload = { email: userData.email };
+    const payload = { email: userFound.email };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 }

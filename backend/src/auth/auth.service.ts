@@ -1,41 +1,73 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../user/user.service';
+import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private usersService: UsersService,
+    private dataSource: DataSource
   ) {}
 
   // NUEVO: Método para registrar un usuario
-  async register(email: string, password: string) {
-    const existe = await this.usersService.findOneByUsername(email);
-    if (existe) throw new ConflictException('El usuario ya existe');
+  async register(user) {
+    let exists;
+    try {
+      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
+      exists = await this.dataSource.query(
+        'CALL userExists(?)',
+        [user.email] // <-- Los parámetros se pasan como un array
+      );
+
+    } catch (error) {
+      console.error('Hubo un problema al acceder a la Base de Datos');
+      throw error;
+    }
+    if (exists) throw new ConflictException('El usuario ya existe');
 
     // Encriptamos la contraseña (10 rondas es el estándar seguro)
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
 
-    const newUser = await this.usersService.create({
-      email: email,
-      password: hashedPassword,
-    });
+    let newUser;
+    try {
+      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
+      newUser = await this.dataSource.query(
+        'CALL userCreate(?,?)',
+        [user.email, hashedPassword] // <-- Los parámetros se pasan como un array
+      );
+
+    } catch (error) {
+      console.error('Hubo un problema al acceder a la Base de Datos');
+      throw error;
+    }
+
 
     return { mensaje: '¡Usuario creado!', id: newUser.id_user };
   }
 
   // ACTUALIZADO: Método de login real
-  async login(email: string, password: string) {
-    const user = await this.usersService.findOneByUsername(email);
-    if (!user) throw new UnauthorizedException('Credenciales incorrectas');
+  async login(user) {
+    let userData
+    try {
+      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
+      userData = await this.dataSource.query(
+        'CALL userExists(?)',
+        [user.email] // <-- Los parámetros se pasan como un array
+      );
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    } catch (error) {
+      console.error('Hubo un problema al acceder a la Base de Datos');
+      throw error;
+    }
+
+    if (!userData) throw new UnauthorizedException('Credenciales incorrectas');
+
+    const isPasswordValid = await bcrypt.compare(user.password, userData.password);
     if (!isPasswordValid) throw new UnauthorizedException('Credenciales incorrectas');
 
-    const payload = { sub: user.id_user, email: user.email };
+    const payload = { email: userData.email };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 }

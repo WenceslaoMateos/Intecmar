@@ -8,13 +8,13 @@ export class AuthController {
 
   @Post('register')
   register(@Body() body: Record<string, string>) {
-    return this.authService.register(body.email, body.password);
+    return this.authService.register(body.user);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() body: Record<string, string>) {
-    return this.authService.login(body.email, body.password);
+    return this.authService.login(body.user);
   }
 
   @UseGuards(AuthGuard)

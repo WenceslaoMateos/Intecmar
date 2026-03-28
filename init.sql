@@ -3,9 +3,9 @@ CREATE TABLE `User`
     id_user INT AUTO_INCREMENT,
     email varchar(255) not null,
     `password` varchar(255) not null,
-    firstName varchar(100) not null,
-    lastName varchar(100) not null,
-    birthDate date not null,
+    firstName varchar(100),
+    lastName varchar(100),
+    birthDate date,
 
     PRIMARY KEY (id_user)
 );
@@ -28,6 +28,9 @@ CREATE TABLE UsersXRol(
     FOREIGN KEY(id_role) REFERENCES `Role`(id_role)
 );
 
+/************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************/
+
 INSERT INTO `Role`(`name`, public)
 VALUES 
 ('Administrador', FALSE),
@@ -45,3 +48,35 @@ VALUES
 ('Jurado', TRUE),
 ('Referente Institucional', TRUE),
 ('Evaluador/a', TRUE);
+
+/************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************/
+
+DELIMITER //
+
+CREATE PROCEDURE userExists(
+    IN p_email VARCHAR(255)
+)
+BEGIN
+    SELECT u.email, u.password
+    FROM `User` u 
+    WHERE u.email = p_email 
+END //
+
+DELIMITER ;
+/************************************************************************************************************************************************************/
+
+DELIMITER //
+
+CREATE PROCEDURE userCreate(
+    IN p_email VARCHAR(255),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    INSERT INTO `User` (email, `password`)
+    VALUES (p_email, p_password);
+
+    SELECT LAST_INSERT_ID() AS id_user;
+END //
+
+DELIMITER ;

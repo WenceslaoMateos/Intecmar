@@ -29,7 +29,7 @@ export default function RegistroPage() {
 
     // Validación básica
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden. Por favor, verifícalas.');
+      setError('Las contraseñas no coinciden.');
       return;
     }
 

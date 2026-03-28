@@ -20,7 +20,6 @@ export default function IngresarPage() {
     setIsLoading(true);
 
     try {
-      // 1. Petición real al backend de Nest.js (Ahora apunta al puerto 3000 de tu Docker)
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {
@@ -35,14 +34,14 @@ export default function IngresarPage() {
 
       const data = await response.json();
       
-      // 2. Extraemos el token del backend (Asumiendo que Nest.js devuelve { access_token: "..." })
+      // extrae el token del backend (Asumiendo que Nest.js devuelve { access_token: "..." })
       const token = data.access_token; 
 
-      // 3. ACTUALIZAMOS LAS COOKIES: Esto es lo que lee tu proxy.ts en el Canvas
-      // Le decimos que aplica a toda la página (path=/) y dura 1 día (max-age=86400)
+      // Actualziación de cookies
+      // toda la página (path=/) y dura 1 día (max-age=86400)
       document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Strict`;
 
-      // 4. Redirigimos al panel protegido. ¡El proxy ahora nos dejará pasar!
+      // Redirigimos al panel protegido
       router.push('/perfil');
       
     } catch (err: any) {

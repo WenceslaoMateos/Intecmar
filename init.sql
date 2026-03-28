@@ -9,7 +9,6 @@ CREATE TABLE `User`
 
     PRIMARY KEY (id_user)
 );
-);
 
 CREATE TABLE `Role`(
     id_role INT AUTO_INCREMENT,
@@ -17,7 +16,6 @@ CREATE TABLE `Role`(
     public boolean default TRUE,
 
     PRIMARY KEY (id_role)
-);
 );
 
 CREATE TABLE UsersXRol(
@@ -53,7 +51,7 @@ VALUES
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
 
-DELIMITER //
+DELIMITER $$
 
 CREATE PROCEDURE userExists(
     IN p_email VARCHAR(255)
@@ -61,13 +59,8 @@ CREATE PROCEDURE userExists(
 BEGIN
     SELECT u.email, u.password
     FROM `User` u 
-    WHERE u.email = p_email 
-END //
-
-DELIMITER ;
-/************************************************************************************************************************************************************/
-
-DELIMITER //
+    WHERE u.email = p_email;
+END $$
 
 CREATE PROCEDURE userCreate(
     IN p_email VARCHAR(255),
@@ -78,6 +71,6 @@ BEGIN
     VALUES (p_email, p_password);
 
     SELECT LAST_INSERT_ID() AS id_user;
-END //
+END $$
 
 DELIMITER ;

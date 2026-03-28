@@ -9,6 +9,7 @@ CREATE TABLE `User`
 
     PRIMARY KEY (id_user)
 );
+);
 
 CREATE TABLE `Role`(
     id_role INT AUTO_INCREMENT,
@@ -17,12 +18,12 @@ CREATE TABLE `Role`(
 
     PRIMARY KEY (id_role)
 );
+);
 
 CREATE TABLE UsersXRol(
     id_usersxrole INT AUTO_INCREMENT,
-    id_user int not null,
-    id_role int not null,
-
+    id_user INT NOT NULL,
+    id_role INT NOT NULL,
     PRIMARY KEY (id_usersxrole),
     FOREIGN KEY(id_user) REFERENCES `User`(id_user),
     FOREIGN KEY(id_role) REFERENCES `Role`(id_role)

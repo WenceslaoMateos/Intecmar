@@ -29,7 +29,7 @@ export default function RegistroPage() {
 
     // Validación básica
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      setError('Las contraseñas no coinciden. Por favor, verifícalas.');
       return;
     }
 
@@ -41,13 +41,16 @@ export default function RegistroPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Enviamos el objeto envuelto en "user" por comodidad y escalabilidad
         body: JSON.stringify({ 
-          firstName: nombre, 
-          lastName: apellido, 
-          email: email, 
-          password: password,
-          birthDate: birthDate,
-          role: rol 
+          user: {
+            firstName: nombre, 
+            lastName: apellido, 
+            email: email, 
+            password: password,
+            birthDate: birthDate,
+            role: rol 
+          }
         }),
       });
 
@@ -155,7 +158,7 @@ export default function RegistroPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">Selecciona tus Roles</label>
+              <label className="block text-gray-700 text-sm font-bold mb-2">Selecciona tu Rol Principal</label>
               <select value={rol} onChange={(e) => setRol(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal border-gray-300 bg-white transition" required>
                 <option value="" disabled>-- Seleccionar --</option>
                 <option value="Emprendedor/a Incipiente">Emprendedor (Tengo una idea/proyecto)</option>

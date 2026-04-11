@@ -159,7 +159,7 @@ export default function RegistroPage() {
                 </div>
                 <div className="md:col-span-3">
                   <label className="block text-gray-700 text-xs font-bold mb-1">Imagen del DNI (frente y reverso) *</label>
-                  <input type="file" accept=".jpg,.png,.pdf" className="text-xs text-gray-500" />
+                  <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" />
                 </div>
               </div>
             </section>

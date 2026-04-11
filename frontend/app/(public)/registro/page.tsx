@@ -23,6 +23,7 @@ export default function RegistroPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dniFile, setDniFile] = useState<File | null>(null);
 
   // =========================================================================
   // 2. LÓGICA CONDICIONAL DE ROLES
@@ -55,23 +56,48 @@ export default function RegistroPage() {
     });
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
+    // 1. Validate Password
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden. Por favor, verifícalas.');
+      return;
+    }
+
+    // 2. Validate File existence
+    if (!dniFile) {
+      setError('La imagen del DNI es obligatoria.');
       return;
     }
 
     setIsLoading(true);
 
     try {
+      // 3. Create the FormData object
+      const submitData = new FormData();
+
+      // 4. Append the file using the EXACT key the backend expects ('dniFile')
+      submitData.append('dniFile', dniFile);
+
+      // 5. Append all other text fields dynamically
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          // FormData only accepts strings. We stringify arrays so the backend can parse them later if needed.
+          submitData.append(key, JSON.stringify(value));
+        } else {
+          submitData.append(key, String(value));
+        }
+      });
+
+      // 6. Send the request
       const response = await fetch('http://localhost:3000/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData), 
+        // CRITICAL: Do NOT manually set the 'Content-Type' header here. 
+        // The browser will automatically set it to 'multipart/form-data' with the correct boundary.
+        body: submitData, 
       });
 
       if (!response.ok) {
@@ -90,7 +116,6 @@ export default function RegistroPage() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-4 flex justify-center items-center fade-in">
       <div className="bg-white w-full max-w-7xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh]">
@@ -159,7 +184,7 @@ export default function RegistroPage() {
                 </div>
                 <div className="md:col-span-3">
                   <label className="block text-gray-700 text-xs font-bold mb-1">Imagen del DNI (frente y reverso) *</label>
-                  <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" />
+                  <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" onChange={(e) => setDniFile(e.target.files ? e.target.files[0] : null)}/>
                 </div>
               </div>
             </section>

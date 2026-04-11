@@ -6,6 +6,9 @@ CREATE TABLE `User`
     firstName varchar(100),
     lastName varchar(100),
     birthDate date,
+    cuilCuit varchar(11),
+    dni int,
+    uidDNIFile varchar(50),
 
     PRIMARY KEY (id_user)
 );
@@ -18,6 +21,7 @@ CREATE TABLE `Role`(
     PRIMARY KEY (id_role)
 );
 
+-- aca vamos a tener todas las configuraciones de cada rol, cosa que caundo se registre alguien, la informacion por rol se adminiostre en esta tabla
 CREATE TABLE UsersXRol(
     id_usersxrole INT AUTO_INCREMENT,
     id_user INT NOT NULL,
@@ -26,6 +30,8 @@ CREATE TABLE UsersXRol(
     FOREIGN KEY(id_user) REFERENCES `User`(id_user),
     FOREIGN KEY(id_role) REFERENCES `Role`(id_role)
 );
+
+-- hay que guardar las institcuiones en una tabla aparte
 
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
@@ -68,13 +74,25 @@ END $$
 
 CREATE PROCEDURE userCreate(
     IN p_email VARCHAR(255),
-    IN p_password VARCHAR(255)
+    IN p_password VARCHAR(255),
+    IN p_firstName VARCHAR(100),
+    IN p_lastName VARCHAR(100),
+    IN p_birthDate DATE,
+    IN p_cuilCuit VARCHAR(11),
+    IN p_dni INT,
+    IN p_uidDNIFile VARCHAR(50)
 )
 BEGIN
-    INSERT INTO `User` (email, `password`)
-    VALUES (p_email, p_password);
+    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, dni, uidDNIFile)
+    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_dni, p_uidDNIFile);
 
     SELECT LAST_INSERT_ID() AS id_user;
+END $$
+
+CREATE PROCEDURE listRoles()
+BEGIN
+    SELECT * 
+    FROM `Role`;
 END $$
 
 DELIMITER ;

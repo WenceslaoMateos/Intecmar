@@ -1,74 +1,93 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { FileStoringService } from '../fileStoring/fileStoring.service'; // Adjust path if necessary
+import 'multer';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private dataSource: DataSource
+    private dataSource: DataSource,
+    private fileStoringService: FileStoringService // Inject the internal storage module
   ) {}
 
-  // NUEVO: Método para registrar un usuario
-  async register(user) {
+  async register(userData: Record<string, string>, file: Express.Multer.File) {
     let exists;
     try {
-      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
-      exists = await this.dataSource.query(
-        'CALL userExists(?)',
-        [user.email] // <-- Los parámetros se pasan como un array
-      );
-
+      exists = await this.dataSource.query('CALL userExists(?)', [userData.email]);
     } catch (error) {
-      console.error('Hubo un problema al acceder a la Base de Datos');
-      throw error;
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
     }
 
-    if (exists[0].length != 0) throw new ConflictException('El usuario ya existe');
+    if (exists[0].length !== 0) throw new ConflictException('User already exists');
 
-    // Encriptamos la contraseña (10 rondas es el estándar seguro)
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
+    // 1. Delegate file encryption and storage
+    let uidDNIFile: string;
+    try {
+      uidDNIFile = await this.fileStoringService.storeSecureFile(file);
+    } catch (error) {
+      console.error('Failed to encrypt/store DNI file:', error);
+      throw new InternalServerErrorException('Failed to process DNI image');
+    }
+
+    /**
+     * apellido
+     * nombre
+     * fecha nacimiento
+     * dni
+     * cuil/cuit
+     * dni (aca va la imagen)
+     * ----genero
+     * domicilio
+     * ----certificacion de domicilio
+     * ----localidad
+     * ----partido
+     * ----provincia
+     * ----nacionalidad
+     * roles array com los roles
+     *    -mas de uno, asi que llega un array de los ids que quiere el usuario
+     *    -si es referente institucional, tiene que poner la institucion acorde a un valor de las guardadas
+     */
+
+    // 2. Save User + File UID to the database
     let newUser;
     try {
-      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
       newUser = await this.dataSource.query(
-        'CALL userCreate(?,?)',
-        [user.email, hashedPassword] // <-- Los parámetros se pasan como un array
+        'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?)', // Now expecting 3 parameters!
+        [userData.email, hashedPassword, userData.firstName, userData.lastName, userData.birthDate, userData.cuilCuit, userData.dni, uidDNIFile] 
       );
-
     } catch (error) {
-      console.error('Hubo un problema al acceder a la Base de Datos');
-      throw error;
+      console.error('Database insertion problem:', error);
+      throw new InternalServerErrorException('Failed to create user in database');
     }
 
-
-    return { mensaje: '¡Usuario creado!', id: newUser.id_user };
+    return { 
+      message: 'User successfully created!', 
+      userId: newUser[0][0].id_user,
+    };
   }
 
-  // ACTUALIZADO: Método de login real
-  async login(user) {
-    let userData
+  async login(userData: Record<string, string>) {
+    let result;
     try {
-      // Usamos sintaxis nativa de MySQL: CALL nombre_procedure(parámetros)
-      userData = await this.dataSource.query(
-        'CALL userExists(?)',
-        [user.email] // <-- Los parámetros se pasan como un array
-      );
-
+      result = await this.dataSource.query('CALL userExists(?)', [userData.email]);
     } catch (error) {
-      console.error('Hubo un problema al acceder a la Base de Datos');
-      throw error;
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
     }
 
-    if (userData[0].length == 0) throw new UnauthorizedException('Credenciales incorrectas');
+    if (result[0].length === 0) throw new UnauthorizedException('Invalid credentials');
 
-    const userFound = userData[0][0];
+    const userFound = result[0][0];
 
-    const isPasswordValid = await bcrypt.compare(user.password, userFound.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Credenciales incorrectas');
+    const isPasswordValid = await bcrypt.compare(userData.password, userFound.password);
+    if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
 
     const payload = { email: userFound.email };
     return { access_token: await this.jwtService.signAsync(payload) };

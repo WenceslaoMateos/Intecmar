@@ -25,10 +25,9 @@ export default function RegistroPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // NUEVO ESTADO: Controla qué sección está abierta (por defecto la 1)
   const [openSection, setOpenSection] = useState<number>(1);
-
+  const [dniFile, setDniFile] = useState<File | null>(null);
+  
   // =========================================================================
   // 2. LÓGICA CONDICIONAL DE ROLES
   // =========================================================================
@@ -75,25 +74,44 @@ export default function RegistroPage() {
     setOpenSection(prev => prev === section ? 0 : section);
   };
 
-    const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
-    // Solo verificamos contraseñas si ambas fueron escritas (para permitir envío vacío en pruebas)
+    // Validar contraseñas ------------------------------------ hay que poner todos los campos obligatorios!!
     if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden. Por favor, verifíquelas.');
-      setOpenSection(7); // Abre la sección de contraseñas para que el usuario vea el error
+      setOpenSection(7);              //abre la sección de acceso para que el usuario chequee las passwords
+      return;
+    }
+
+    if (!dniFile) {
+      setError('La imagen del DNI es obligatoria.');
+      setOpenSection(1);              // Abre la sección 1 para que vea el error
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Usamos Axios (api.post) en lugar del fetch largo
-      const response = await api.post('/auth/register', formData);
+      // Crear el empaquetado especial para archivos y datos (FormData)
+      const submitData = new FormData();
+      submitData.append('dniFile', dniFile);
+
+      // Agregamos todos los demás campos
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          submitData.append(key, JSON.stringify(value));
+        } else {
+          submitData.append(key, String(value));
+        }
+      });
+
+      // Enviamos con Axios usando submitData
+      // Nota: Axios al ver 'submitData' pone automáticamente el Content-Type multipart/form-data
+      const response = await api.post('/auth/register', submitData);
       
-      // Axios automáticamente parsea el JSON en la propiedad "data"
       const data = response.data;
 
       // JWT EN COOKIES
@@ -109,7 +127,7 @@ export default function RegistroPage() {
       }, 2000);
 
     } catch (err: any) {
-      // Axios guarda los errores que tira el backend (Nest.js) en err.response.data
+      // Axios guarda los errores del backend en err.response.data
       const backendMessage = err.response?.data?.message;
       setError(backendMessage || 'Error al conectar con el servidor.');
     } finally {
@@ -208,7 +226,7 @@ export default function RegistroPage() {
                   </div>
                   <div className="md:col-span-3">
                     <label className="block text-gray-700 text-xs font-bold mb-1">Imagen del DNI (frente y reverso) *</label>
-                    <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" />
+                    <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" onChange={(e) => setDniFile(e.target.files ? e.target.files[0] : null)}/>
                   </div>
                 </div>
               </div>

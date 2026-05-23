@@ -8,7 +8,7 @@ import { FileStoringModule } from '../file-storing.module'; // Adjust the path
   imports: [
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET, // En el futuro, esto va en el .env
+      secret: process.env.JWT_SECRET, 
       signOptions: { expiresIn: '1h' }, // El token dura 1 hora
     }),
     JwtModule.register({ /* ... tu config ... */ }),

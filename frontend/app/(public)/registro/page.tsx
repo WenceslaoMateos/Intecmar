@@ -1,15 +1,23 @@
 'use client'; 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 
 export default function RegistroPage() {
   // =========================================================================
-  // 1. ESTADO UNIFICADO
+  // 0. ESTADOS PARA LOS CATÁLOGOS DINÁMICOS (BD)
+  // =========================================================================
+  const [rolesDB, setRolesDB] = useState<any[]>([]);
+  const [docTypesDB, setDocsDB] = useState<any[]>([]);
+  const [gendersDB, setGendersDB] = useState<any[]>([]);
+  const [institutionsDB, setInstitutionsDB] = useState<any[]>([]);
+
+  // =========================================================================
+  // 1. ESTADO UNIFICADO DEL FORMULARIO
   // =========================================================================
   const [formData, setFormData] = useState({
     nombre: '', apellido: '', fechaNacimiento: '', 
-    tipoDocumento: 'DNI', numeroDocumento: '', 
+    tipoDocumento: '', numeroDocumento: '', 
     cuil: '', genero: '',
     domicilio: '', localidad: '', partido: '', provincia: '', nacionalidad: '',
     roles: [] as string[], 
@@ -28,15 +36,51 @@ export default function RegistroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [openSection, setOpenSection] = useState<number>(1);
   const [cvFile, setCvFile] = useState<File | null>(null);
+
+  // =========================================================================
+  // 1.5 FETCH DE DATOS AL CARGAR LA PÁGINA
+  // =========================================================================
+  useEffect(() => {
+    const fetchCatalogos = async () => {
+      try {
+        // ATENCIÓN BACKEND: Reemplazar estas rutas por las reales que armó tu compañero
+        // Ej: puede que él las haya puesto como '/api/roles' o '/roles'
+        const [resRoles, resDocs, resGenders, resInst] = await Promise.all([
+          api.get('/roles').catch(() => ({ data: [] })), 
+          api.get('/type_documents').catch(() => ({ data: [] })),
+          api.get('/genders').catch(() => ({ data: [] })),
+          api.get('/institutions').catch(() => ({ data: [] }))
+        ]);
+
+        setRolesDB(resRoles.data);
+        setDocsDB(resDocs.data);
+        setGendersDB(resGenders.data);
+        setInstitutionsDB(resInst.data);
+      } catch (err) {
+        console.error("Error al cargar datos desde la BD", err);
+      }
+    };
+    fetchCatalogos();
+  }, []);
   
   // =========================================================================
-  // 2. LÓGICA CONDICIONAL DE ROLES
+  // 2. LÓGICA CONDICIONAL DE ROLES (Adaptada a IDs dinámicos)
   // =========================================================================
+  // Función auxiliar para obtener el nombre del rol a partir de su ID guardado en formData
+  const getRoleName = (roleId: string) => {
+    // Buscamos coincidencia (soportando id o id_role dependiendo de cómo lo mande la BD)
+    const role = rolesDB.find(r => String(r.id) === roleId || String(r.id_role) === roleId);
+    return role ? (role.name || role.nombre || '') : '';
+  };
+
   const businessRoles = ['Emprendedor incipiente', 'Emprendedor en marcha', 'Empresario joven', 'Empresario maduro'];
   
-  const hasBusinessRole = formData.roles.some(r => businessRoles.includes(r));
-  const isReferente = formData.roles.includes('Referente Institucional');
-  const isOtro = formData.roles.some(r => !businessRoles.includes(r) && r !== 'Referente Institucional');
+  const hasBusinessRole = formData.roles.some(roleId => businessRoles.includes(getRoleName(roleId)));
+  const isReferente = formData.roles.some(roleId => getRoleName(roleId).includes('Referente Institucional'));
+  const isOtro = formData.roles.some(roleId => {
+    const name = getRoleName(roleId);
+    return !businessRoles.includes(name) && !name.includes('Referente Institucional');
+  });
 
   const menuItems = [
     { id: 1, title: '1. Información Básica' },
@@ -74,15 +118,15 @@ export default function RegistroPage() {
   };
 
   const handleAddRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newRole = e.target.value;
-    if (newRole && !formData.roles.includes(newRole)) {
-      setFormData(prev => ({ ...prev, roles: [...prev.roles, newRole] }));
+    const newRoleId = e.target.value; // guarda el ID del rol
+    if (newRoleId && !formData.roles.includes(newRoleId)) {
+      setFormData(prev => ({ ...prev, roles: [...prev.roles, newRoleId] }));
     }
     e.target.value = ""; 
   };
 
-  const handleRemoveRole = (roleToRemove: string) => {
-    setFormData(prev => ({ ...prev, roles: prev.roles.filter(r => r !== roleToRemove) }));
+  const handleRemoveRole = (roleIdToRemove: string) => {
+    setFormData(prev => ({ ...prev, roles: prev.roles.filter(id => id !== roleIdToRemove) }));
   };
 
   const toggleSection = (section: number) => {
@@ -106,26 +150,33 @@ export default function RegistroPage() {
       return;
     }
 
-    // Validación opcional: Si subió un archivo, verificar que no exceda los 10MB
     if (cvFile && cvFile.size > 10 * 1024 * 1024) {
       setError('El Curriculum Vitae excede el tamaño máximo permitido de 10 MB.');
       setOpenSection(4);
       return;
     }
 
+    setIsLoading(true);
+
     try {
       const submitData = new FormData();
 
-      // se agregan todos los datos de texto
-      Object.entries(formData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          submitData.append(key, JSON.stringify(value));
-        } else {
-          submitData.append(key, String(value));
-        }
-      });
+      // Mapeo EXACTO de variables como las espera el Backend 
+      submitData.append('firstName', formData.nombre);
+      submitData.append('lastName', formData.apellido);
+      submitData.append('email', formData.email);
+      submitData.append('password', formData.password);
+      submitData.append('birthDate', formData.fechaNacimiento);
+      submitData.append('typeDocument', formData.tipoDocumento); // ID del tipo de doc
+      submitData.append('numberDocument', formData.numeroDocumento);
+      submitData.append('cuilCuit', formData.cuil);
+      submitData.append('gender', formData.genero); // ID del género
+      submitData.append('roles', JSON.stringify(formData.roles)); // Array de IDs
+      
+      if (isReferente) {
+        submitData.append('institucionReferente', formData.institucionReferente); // ID de la institución
+      }
 
-      // se agrega el archivo CV si el usuario lo seleccionó
       if (cvFile) {
         submitData.append('cvFile', cvFile);
       }
@@ -151,11 +202,12 @@ export default function RegistroPage() {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-4 flex justify-center items-center fade-in">
       <div className="bg-white w-full max-w-7xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh]">
         
-        {/* ================= PANEL IZQUIERDO (FIJO Y COMBINADO) ================= */}
+        {/* ================= PANEL IZQUIERDO ================= */}
         <div className="w-full md:w-1/4 bg-brand-dark p-10 md:p-12 text-white flex flex-col relative overflow-hidden hidden md:flex shrink-0">
           <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
           
@@ -173,7 +225,6 @@ export default function RegistroPage() {
 
           <hr className="border-gray-700 relative z-10 mb-8 opacity-50" />
 
-          {/* Bloque de Progreso Dinámico */}
           <div className="relative z-10 flex-grow">
             <h4 className="text-sm uppercase tracking-wider font-bold mb-4 text-gray-400">Tu progreso</h4>
             <ul className="space-y-3 text-xs font-medium">
@@ -191,7 +242,7 @@ export default function RegistroPage() {
           </div>
         </div>
 
-        {/* ================= FORMULARIO DERECHO (SCROLL) ================= */}
+        {/* ================= FORMULARIO DERECHO ================= */}
         <div className="w-full md:w-3/4 p-8 md:p-12 overflow-y-auto bg-gray-50/50 custom-scrollbar relative">
           <h2 className="text-2xl font-bold text-gray-800 mb-2 font-heading">Formulario de Registro de Personas</h2>
           <p className="text-sm text-gray-500 mb-8 pb-4 border-b border-gray-200">
@@ -227,9 +278,12 @@ export default function RegistroPage() {
                   <div>
                     <label className="block text-gray-700 text-xs font-bold mb-1">Tipo de documento *</label>
                     <select name="tipoDocumento" value={formData.tipoDocumento} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
-                      <option value="DNI">DNI</option>
-                      <option value="Pasaporte">Pasaporte</option>
-                      <option value="Otro">Otro</option>
+                      <option value="" disabled>Seleccionar</option>
+                      {docTypesDB.map((doc: any) => (
+                        <option key={doc.id || doc.id_documentType} value={doc.id || doc.id_documentType}>
+                          {doc.name || doc.nombre}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -245,9 +299,11 @@ export default function RegistroPage() {
                     <label className="block text-gray-700 text-xs font-bold mb-1">Género *</label>
                     <select name="genero" value={formData.genero} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
                       <option value="" disabled>Seleccionar</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Femenino">Femenino</option>
-                      <option value="Otro">Otro</option>
+                      {gendersDB.map((gen: any) => (
+                        <option key={gen.id || gen.id_gender} value={gen.id || gen.id_gender}>
+                          {gen.name || gen.nombre}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -300,10 +356,10 @@ export default function RegistroPage() {
                   
                   {formData.roles.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {formData.roles.map(r => (
-                        <span key={r} className="bg-brand-teal text-white px-3 py-1.5 rounded-full text-sm flex items-center shadow-sm">
-                          {r}
-                          <button type="button" onClick={() => handleRemoveRole(r)} className="ml-2 text-white/80 hover:text-white transition">
+                      {formData.roles.map(roleId => (
+                        <span key={roleId} className="bg-brand-teal text-white px-3 py-1.5 rounded-full text-sm flex items-center shadow-sm">
+                          {getRoleName(roleId)}
+                          <button type="button" onClick={() => handleRemoveRole(roleId)} className="ml-2 text-white/80 hover:text-white transition">
                             <i className="fas fa-times-circle"></i>
                           </button>
                         </span>
@@ -315,7 +371,7 @@ export default function RegistroPage() {
                     </p>
                   )}
 
-                  {/* SELECTOR DE ROLES */}
+                  {/* SELECT DINÁMICO: ROLES */}
                   <label className="block text-gray-800 text-xs font-bold mb-2 text-gray-500">Añadir otro rol a tu perfil</label>
                   <select 
                     value="" 
@@ -323,35 +379,20 @@ export default function RegistroPage() {
                     className="w-full md:w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white shadow-sm font-medium focus:ring-2 focus:ring-brand-teal focus:border-brand-teal"
                   >
                     <option value="" disabled>-- Seleccionar Rol --</option>
-                    
-                    <optgroup label="Emprendedor/a o Empresario/a">
-                      <option value="Emprendedor incipiente" disabled={hasBusinessRole}>
-                        Emprendedor/a incipiente (Idea/Organizando)
-                      </option>
-                      <option value="Emprendedor en marcha" disabled={hasBusinessRole}>
-                        Emprendedor/a con empresa en marcha (-3 años)
-                      </option>
-                      <option value="Empresario joven" disabled={hasBusinessRole}>
-                        Empresario/a joven (3 a 15 años)
-                      </option>
-                      <option value="Empresario maduro" disabled={hasBusinessRole}>
-                        Empresario/a maduro (+15 años)
-                      </option>
-                    </optgroup>
-                    
-                    <optgroup label="Otros Roles">
-                      <option value="Docente o Facilitador" disabled={formData.roles.includes('Docente o Facilitador')}>Docente / Facilitador/a</option>
-                      <option value="Investigador" disabled={formData.roles.includes('Investigador')}>Investigador/a</option>
-                      <option value="Consultor" disabled={formData.roles.includes('Consultor')}>Consultor/a</option>
-                      <option value="Mentor" disabled={formData.roles.includes('Mentor')}>Mentor/a</option>
-                      <option value="Tutor" disabled={formData.roles.includes('Tutor')}>Tutor/a</option>
-                      <option value="Estudiante" disabled={formData.roles.includes('Estudiante')}>Estudiante</option>
-                      <option value="Inversor" disabled={formData.roles.includes('Inversor')}>Inversor/a</option>
-                      <option value="Jurado" disabled={formData.roles.includes('Jurado')}>Jurado</option>
-                      <option value="Referente Institucional" disabled={formData.roles.includes('Referente Institucional')}>Referente institucional</option>
-                      <option value="Evaluador" disabled={formData.roles.includes('Evaluador')}>Evaluador/a</option>
-                      <option value="Otro" disabled={formData.roles.includes('Otro')}>Otro</option>
-                    </optgroup>
+                    {rolesDB.map((rol: any) => {
+                      const id = String(rol.id || rol.id_role);
+                      const name = rol.name || rol.nombre;
+                      const isBusiness = businessRoles.includes(name);
+                      
+                      // Deshabilitar si ya se eligió este rol, o si es un rol de negocio y ya hay otro rol de negocio elegido
+                      const isDisabled = formData.roles.includes(id) || (isBusiness && hasBusinessRole);
+
+                      return (
+                        <option key={id} value={id} disabled={isDisabled}>
+                          {name}
+                        </option>
+                      );
+                    })}
                   </select>
                   
                   {hasBusinessRole && (
@@ -406,13 +447,15 @@ export default function RegistroPage() {
                     <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-magenta">
                       <h4 className="text-brand-magenta font-bold text-sm mb-2"><i className="fas fa-building"></i> Datos de Institución (Referente)</h4>
                       <div>
+                        {/* SELECT DINÁMICO: INSTITUCIONES */}
                         <label className="block text-gray-700 text-xs font-bold mb-2">¿A qué institución pertenece?</label>
                         <select name="institucionReferente" value={formData.institucionReferente} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white">
                           <option value="">Seleccionar institución...</option>
-                          <option value="Desarrollo Local e Inversiones MGP">Desarrollo Local e Inversiones MGP</option>
-                          <option value="UNMDP">UNMDP</option>
-                          <option value="ATICMA">ATICMA</option>
-                          <option value="Universidad Atlántida">Universidad Atlántida</option>
+                          {institutionsDB.map((inst: any) => (
+                            <option key={inst.id || inst.id_institution} value={inst.id || inst.id_institution}>
+                              {inst.name || inst.nombre}
+                            </option>
+                          ))}
                           <option value="Otra">Otra...</option>
                         </select>
                       </div>
@@ -521,6 +564,7 @@ export default function RegistroPage() {
                     className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand-teal/10 file:text-brand-teal hover:file:bg-brand-teal/20 transition cursor-pointer border border-gray-200 rounded-full bg-gray-50 p-1" 
                   />
                 </div>
+
               </div>
             </section>
 

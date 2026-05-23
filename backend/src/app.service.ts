@@ -58,8 +58,7 @@ export class AppService {
       let newUser;
       try {
         newUser = await this.dataSource.query(
-          // Actualizamos a 9 signos de interrogación para incluir el CV
-          'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+          'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
           [
             userData.email, 
             hashedPassword, 
@@ -70,7 +69,8 @@ export class AppService {
             userData.typeDocument, 
             userData.numberDocument,
             userData.gender,
-            savedCvFileName // Pasamos el string del archivo o 'null'
+            savedCvFileName,
+            userData.address
           ] 
         );
       } catch (error) {

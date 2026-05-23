@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm'; // <--- Importar esto
 import { AuthModule } from './auth/auth.module';
+import { FileStoringModule } from './fileStoring/fileStoring.module'; // <-- 1. Importarlo arriba
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
       retryDelay: 3000, // Espera 3 segundos entre cada intento
     }),
     AuthModule,
+    FileStoringModule // <-- 2. Agregarlo al arreglo de imports
   ],
   controllers: [AppController],
   providers: [AppService],

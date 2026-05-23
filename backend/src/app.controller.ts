@@ -1,14 +1,12 @@
 import { AppService } from './app.service';
 import { Body, Controller, Post, Get, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthService } from './auth/auth.service';
 import 'multer';
 
 @Controller()
 export class AppController {
   constructor(
-    private readonly appService: AppService,
-    private authService: AuthService
+    private readonly appService: AppService
   ) {}
 
   @Post('register')

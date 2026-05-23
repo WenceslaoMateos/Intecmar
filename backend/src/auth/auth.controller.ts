@@ -9,19 +9,19 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  @UseInterceptors(FileInterceptor('dniFile')) // Expecting the file under the key 'dniFile'
+  @UseInterceptors(FileInterceptor('cvFile')) // The string here must match your frontend FormData key
   register(
-    @Body() body: Record<string, string>, // Contains text fields like body.email and body.password
+    @Body() body: Record<string, string>,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10 MB limit
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|pdf)' }), // Accepted formats
         ],
       }),
     ) file: Express.Multer.File
   ) {
-    // Pass both the text data and the secure file buffer to the service
+    // We now pass both the text body and the file to your service
     return this.authService.register(body, file);
   }
 

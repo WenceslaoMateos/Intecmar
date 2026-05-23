@@ -53,4 +53,28 @@ export class FileStoringService implements OnModuleInit {
 
     return Buffer.concat([decipher.update(encryptedData), decipher.final()]);
   }
+  
+  async storeFile(file: Express.Multer.File): Promise<string> {
+    const uid = uuidv4();
+    // Extract the original extension (e.g., '.jpg', '.pdf')
+    const extension = path.extname(file.originalname); 
+    const finalName = `${uid}${extension}`; 
+    const completePath = path.join(this.storagePath, finalName);
+
+    // Save the raw buffer directly to the disk without encryption
+    fs.writeFileSync(completePath, file.buffer);
+
+    return finalName;
+  }
+
+  getFile(fileName: string): Buffer {
+    const filePath = path.join(this.storagePath, fileName);
+    
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('File not found');
+    }
+
+    // Read and return the raw file from the disk
+    return fs.readFileSync(filePath);
+  }
 }

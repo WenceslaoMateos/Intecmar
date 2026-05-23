@@ -2,18 +2,18 @@ import { Injectable, UnauthorizedException, ConflictException, InternalServerErr
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { FileStoringService } from '../fileStoring/fileStoring.service'; // Adjust path if necessary
 import 'multer';
+import { FileStoringService } from '../fileStoring/fileStoring.service'; 
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private dataSource: DataSource,
-    private fileStoringService: FileStoringService // Inject the internal storage module
+    private fileStoringService: FileStoringService 
   ) {}
 
-  async register(userData: Record<string, string>, file: Express.Multer.File) {
+  async register(userData: Record<string, string>, cvFile?: Express.Multer.File) {
     let exists;
     try {
       exists = await this.dataSource.query('CALL userExists(?)', [userData.email]);
@@ -27,25 +27,26 @@ export class AuthService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
-    // 1. Delegate file encryption and storage
-    let uidDNIFile: string;
-    try {
-      uidDNIFile = await this.fileStoringService.storeSecureFile(file);
-    } catch (error) {
-      console.error('Failed to encrypt/store DNI file:', error);
-      throw new InternalServerErrorException('Failed to process DNI image');
+    let savedCvFileName: string | null = null;
+    if (cvFile) {
+      try {
+        savedCvFileName = await this.fileStoringService.storeFile(cvFile);
+      } catch (error) {
+        console.error('Failed to store CV file:', error);
+        throw new InternalServerErrorException('Failed to process CV file');
+      }
     }
 
     /**
      * apellido
      * nombre
      * fecha nacimiento
-     * dni
+     * tipo de doc
+     * numero de doc
      * cuil/cuit
-     * dni (aca va la imagen)
+     * cv
      * ----genero
      * domicilio
-     * ----certificacion de domicilio
      * ----localidad
      * ----partido
      * ----provincia
@@ -59,8 +60,19 @@ export class AuthService {
     let newUser;
     try {
       newUser = await this.dataSource.query(
-        'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?)', // Now expecting 3 parameters!
-        [userData.email, hashedPassword, userData.firstName, userData.lastName, userData.birthDate, userData.cuilCuit, userData.dni, uidDNIFile] 
+        // Actualizamos a 9 signos de interrogación para incluir el CV
+        'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        [
+          userData.email, 
+          hashedPassword, 
+          userData.firstName, 
+          userData.lastName, 
+          userData.birthDate, 
+          userData.cuilCuit, 
+          userData.typeDocument, 
+          userData.numberDocument,
+          savedCvFileName // Pasamos el string del archivo o 'null'
+        ] 
       );
     } catch (error) {
       console.error('Database insertion problem:', error);
@@ -70,6 +82,7 @@ export class AuthService {
     return { 
       message: 'User successfully created!', 
       userId: newUser[0][0].id_user,
+      cvFile: savedCvFileName // Opcional: retornamos cómo se guardó para que el front lo sepa
     };
   }
 

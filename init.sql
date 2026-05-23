@@ -1,3 +1,15 @@
+create table Gender (
+    id_gender INT AUTO_INCREMENT,
+    `description`varchar(255) not null,
+    PRIMARY KEY (id_gender)
+);
+
+create table DocumentType (
+    id_DocumentType INT AUTO_INCREMENT,
+    `description`varchar(255) not null,
+    PRIMARY KEY (id_DocumentType)
+);
+
 CREATE TABLE `User`
 (
     id_user INT AUTO_INCREMENT,
@@ -10,24 +22,13 @@ CREATE TABLE `User`
     documentType int, 
     numberDocument varchar(50),
     uidDNIFile varchar(50),
-    gender int,,
+    gender int,
     cvFileName varchar(255),
+    `address` varchar(255),
 
     PRIMARY KEY (id_user),
     FOREIGN KEY (documentType) REFERENCES DocumentType (id_DocumentType),
     FOREIGN KEY (gender) REFERENCES Gender(id_gender)
-);
-
-create table Gender (
-    id_gender INT AUTO_INCREMENT,
-    `description`varchar(255) not null,
-    PRIMARY KEY (id_gender)
-);|
-
-create table DocumentType (
-    id_DocumentType INT AUTO_INCREMENT,
-    `description`varchar(255) not null,
-    PRIMARY KEY (id_DocumentType)
 );
 
 CREATE TABLE `Role`(
@@ -55,6 +56,27 @@ create table Institution (
     PRIMARY KEY (id_institution)
 );
 
+CREATE TABLE Province (
+    id_province VARCHAR(2) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_province)
+);
+
+CREATE TABLE County (
+    id_county VARCHAR(5) NOT NULL,
+    id_province VARCHAR(2) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_county),
+    FOREIGN KEY (id_province) REFERENCES Province(id_province)
+);
+
+CREATE TABLE City (
+    id_city VARCHAR(11) NOT NULL,
+    id_county VARCHAR(5) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_city),
+    FOREIGN KEY (id_county) REFERENCES County(id_county)
+);
 -- hay que guardar las institcuiones en una tabla aparte
 
 /************************************************************************************************************************************************************/
@@ -85,7 +107,7 @@ VALUES
 ('Evaluador/a', TRUE, 'Participa en la evaluación de proyectos, programas o convocatorias.'),
 ('Otro', TRUE, 'Rol diverso dentro del ecosistema emprendedor que no encaja en las categorías anteriores.');
 
-insert into gender(description)
+insert into Gender(description)
 values
 ('Femenino'),
 ('Masculino'),
@@ -121,8 +143,6 @@ values
 ('Consejo Profesional de Ciencias Económicas - Buenos Aires'),
 ('Otro');
 
-/************************************************************************************************************************************************************/
-/************************************************************************************************************************************************************/
 
 DELIMITER $$
 
@@ -145,11 +165,12 @@ CREATE PROCEDURE userCreate(
     IN p_DocumentType INT,
     IN p_numberDocument VARCHAR(50),
     IN p_gender INT,
-    IN p_cvFileName VARCHAR(255)
+    IN p_cvFileName VARCHAR(255),
+    IN p_address VARCHAR(255)
 )
 BEGIN
-    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName)
-    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName);
+    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName, `address`)
+    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName, p_address);
 
     SELECT LAST_INSERT_ID() AS id_user;
 END $$

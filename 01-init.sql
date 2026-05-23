@@ -12,6 +12,35 @@ create table DocumentType (
     PRIMARY KEY (id_DocumentType)
 );
 
+CREATE TABLE Province (
+    id_province VARCHAR(2) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_province)
+);
+
+CREATE TABLE County (
+    id_county VARCHAR(5) NOT NULL,
+    id_province VARCHAR(2) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_county),
+    FOREIGN KEY (id_province) REFERENCES Province(id_province)
+);
+
+CREATE TABLE City (
+    id_city VARCHAR(11) NOT NULL,
+    id_county VARCHAR(5) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_city),
+    FOREIGN KEY (id_county) REFERENCES County(id_county)
+);
+
+CREATE TABLE Country (
+    id_country INT AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    phone_code VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id_country)
+);
+
 CREATE TABLE `User`
 (
     id_user INT AUTO_INCREMENT,
@@ -66,34 +95,7 @@ create table Institution (
     PRIMARY KEY (id_institution)
 );
 
-CREATE TABLE Province (
-    id_province VARCHAR(2) NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    PRIMARY KEY (id_province)
-);
 
-CREATE TABLE County (
-    id_county VARCHAR(5) NOT NULL,
-    id_province VARCHAR(2) NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    PRIMARY KEY (id_county),
-    FOREIGN KEY (id_province) REFERENCES Province(id_province)
-);
-
-CREATE TABLE City (
-    id_city VARCHAR(11) NOT NULL,
-    id_county VARCHAR(5) NOT NULL,
-    `name` VARCHAR(100) NOT NULL,
-    PRIMARY KEY (id_city),
-    FOREIGN KEY (id_county) REFERENCES County(id_county)
-);
-
-CREATE TABLE Country (
-    id_country INT AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
-    phone_code VARCHAR(10) NOT NULL,
-    PRIMARY KEY (id_country)
-);
 
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/

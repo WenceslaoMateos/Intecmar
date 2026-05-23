@@ -1,5 +1,5 @@
 import { AppService } from './app.service';
-import { Body, Controller, Post, Get, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
 
@@ -44,5 +44,25 @@ export class AppController {
   @Get('institutions')
   getInstitutions() {
     return this.appService.getInstitutions();
+  }
+
+  @Get('countries')
+  getCountries() {
+    return this.appService.getCountries();
+  }
+
+  @Get('provinces')
+  getProvinces() {
+    return this.appService.getProvinces();
+  }
+
+  @Get('counties/:provinceId')
+  getCountiesByProvince(@Param('provinceId') provinceId: string) {
+    return this.appService.getCountiesByProvince(provinceId);
+  }
+
+  @Get('cities/:countyId')
+  getCitiesByCounty(@Param('countyId') countyId: string) {
+    return this.appService.getCitiesByCounty(countyId);
   }
 }

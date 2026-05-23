@@ -58,7 +58,7 @@ export class AppService {
       let newUser;
       try {
         newUser = await this.dataSource.query(
-          'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+          'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
           [
             userData.email, 
             hashedPassword, 
@@ -70,7 +70,11 @@ export class AppService {
             userData.numberDocument,
             userData.gender,
             savedCvFileName,
-            userData.address
+            userData.address,
+            userData.country,
+            userData.province,
+            userData.county,
+            userData.city
           ] 
         );
       } catch (error) {
@@ -129,5 +133,49 @@ export class AppService {
       throw new InternalServerErrorException('Database access failed');
     }
     return institutions[0];
+  }
+
+  async getCountries() {
+    let countries;
+    try {
+      countries = await this.dataSource.query('CALL getCountries()');
+    } catch (error) {
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
+    }
+    return countries[0];
+  }
+
+  async getProvinces() {
+    let provinces;
+    try {
+      provinces = await this.dataSource.query('CALL getProvinces()');
+    } catch (error) {
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
+    }
+    return provinces[0];
+  }
+
+  async getCountiesByProvince(provinceId: string) {
+    let counties;
+    try {
+      counties = await this.dataSource.query('CALL getCountiesByProvince(?)', [provinceId]);
+    } catch (error) {
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
+    }
+    return counties[0];
+  }
+
+  async getCitiesByCounty(countyId: string) {
+    let cities;
+    try {
+      cities = await this.dataSource.query('CALL getCitiesByCounty(?)', [countyId]);
+    } catch (error) {
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
+    }
+    return cities[0];
   }
 }

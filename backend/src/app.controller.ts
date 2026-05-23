@@ -19,4 +19,9 @@ export class AppController {
   getGenders() {
     return this.appService.getGenders();
   }
+
+  @Get('institutions')
+  getInstitutions() {
+    return this.appService.getInstitutions();
+  }
 }

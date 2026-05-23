@@ -49,6 +49,12 @@ CREATE TABLE UsersXRol(
     FOREIGN KEY(id_role) REFERENCES `Role`(id_role)
 );
 
+create table Institution (
+    id_institution INT AUTO_INCREMENT,
+    name varchar(255) not null,
+    PRIMARY KEY (id_institution)
+);
+
 -- hay que guardar las institcuiones en una tabla aparte
 
 /************************************************************************************************************************************************************/
@@ -60,23 +66,24 @@ values
 ('paulabonifazi@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
 ('nahuel@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O');
 
-INSERT INTO `Role`(`name`, public)
+INSERT INTO `Role`(`name`, public, `description`)
 VALUES 
-('Administrador', FALSE),
-('Emprendedor/a Incipiente', TRUE),
-('Emprendedor/a con empresa en marcha', TRUE),
-('Empresario/a joven', TRUE),
-('Empresario/a maduro', TRUE),
-('Docente o Facilitador/a', TRUE),
-('Investigador/a', TRUE),
-('Consultor/a', TRUE),
-('Mentor/a', TRUE),
-('Tutor/a', TRUE),
-('Estudiante', TRUE),
-('Inversor/a', TRUE),
-('Jurado', TRUE),
-('Referente Institucional', TRUE),
-('Evaluador/a', TRUE);
+('Administrador', FALSE, 'Usuario con permisos de administración'),
+('Emprendedor/a Incipiente', TRUE, 'Tengo una idea o proyecto emprendedor y estoy organizando las actividades para ponerlo en marcha y crear la empresa'),
+('Emprendedor/a con empresa en marcha', TRUE, 'Tengo una nueva empresa (menos de 3 años) y quiero crecer (corresponde a la etapa Desarrollo inicial del perfil Empresas)'),
+('Empresario/a joven', TRUE, 'Tengo una empresa joven (de 3 a 15 años de antigüedad) rentable y quiero hacerla crecer'),
+('Empresario/a maduro', TRUE, 'Tengo una empresa madura (más de 15 años de antigüedad)'),
+('Docente o Facilitador/a', TRUE, 'Forma y guía procesos de aprendizaje vinculados al emprendimiento.'),
+('Investigador/a', TRUE, 'Genera conocimiento y desarrolla soluciones aplicadas a la innovación.'),
+('Consultor/a', TRUE, 'Brinda asesoramiento especializado para mejorar proyectos o empresas.'),
+('Mentor/a', TRUE, 'Acompaña a emprendedores aportando experiencia, visión y red de contactos.'),
+('Tutor/a', TRUE, 'Realiza seguimiento cercano del proceso de desarrollo de proyectos.'),
+('Estudiante', TRUE, 'Se encuentra en formación y explora el emprendimiento como oportunidad.'),
+('Inversor/a', TRUE, 'Aporta capital a proyectos con potencial de crecimiento.'),
+('Jurado', TRUE, 'Evalúa proyectos según criterios definidos en convocatorias o programas.'),
+('Referente Institucional', TRUE, 'Representa y articula desde una organización dentro del ecosistema.'),
+('Evaluador/a', TRUE, 'Participa en la evaluación de proyectos, programas o convocatorias.'),
+('Otro', TRUE, 'Rol diverso dentro del ecosistema emprendedor que no encaja en las categorías anteriores.');
 
 insert into gender(description)
 values
@@ -88,6 +95,30 @@ insert into DocumentType(description)
 values
 ('DNI'),
 ('Pasaporte'),
+('Otro');
+
+insert into Institution(name)
+values
+('Desarrollo Local e Inversiones MGP'),
+('UNMDP'),
+('ATICMA'),
+('Universidad Atlántida'),
+('Universidad CAECE'),
+('Universidad FASTA'),
+('UTN'),
+('UNICEN'),
+('ADIMRA Buenos Aires'),
+('Las Brusquitas'),
+('Parque Industrial MDQ'),
+('UCIP'),
+('CONICET'),
+('Fundación UNMDP'),
+('INTI'),
+('Neutrón'),
+('Municipio de Balcarce'),
+('Municipio de General Alvarado'),
+('Fundación Bolsa de Comercio MDP'),
+('Consejo Profesional de Ciencias Económicas - Buenos Aires'),
 ('Otro');
 
 /************************************************************************************************************************************************************/
@@ -144,6 +175,13 @@ BEGIN
 	SELECT id_gender,
 		description
 	FROM Gender;
+END $$
+
+create procedure getInstitutions()
+BEGIN
+    SELECT id_institution,
+        name
+    FROM Institution;
 END $$
 
 

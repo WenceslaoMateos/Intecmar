@@ -37,3 +37,15 @@ export class AppService {
     }
     return genders[0];
   }
+
+  async getInstitutions() {
+    let institutions;
+    try {
+      institutions = await this.dataSource.query('CALL getInstitutions()');
+    } catch (error) {
+      console.error('Database connection problem:', error);
+      throw new InternalServerErrorException('Database access failed');
+    }
+    return institutions[0];
+  }
+}

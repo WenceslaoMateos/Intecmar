@@ -2,16 +2,17 @@
 
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
-import Cookies from 'js-cookie';
 
 export default function RegistroPage() {
   // =========================================================================
   // 1. ESTADO UNIFICADO
   // =========================================================================
   const [formData, setFormData] = useState({
-    nombre: '', apellido: '', fechaNacimiento: '', dni: '', cuil: '', genero: '',
+    nombre: '', apellido: '', fechaNacimiento: '', 
+    tipoDocumento: 'DNI', numeroDocumento: '', 
+    cuil: '', genero: '',
     domicilio: '', localidad: '', partido: '', provincia: '', nacionalidad: '',
-    rol: '', 
+    roles: [] as string[], 
     empresaEnMarcha: '', fechaInicioEmpresa: '', experienciaPrevia: '', motivacionEmprender: '', 
     institucionReferente: '', otraInstitucion: '', serviciosOfrecidos: '', serviciosAportados: '', 
     motivacionesParticipar: [] as string[], 
@@ -26,14 +27,16 @@ export default function RegistroPage() {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [openSection, setOpenSection] = useState<number>(1);
-  const [dniFile, setDniFile] = useState<File | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
   
   // =========================================================================
   // 2. LÓGICA CONDICIONAL DE ROLES
   // =========================================================================
-  const isEmprendedor = ['Emprendedor incipiente', 'Emprendedor en marcha', 'Empresario joven', 'Empresario maduro'].includes(formData.rol);
-  const isReferente = formData.rol === 'Referente Institucional';
-  const isOtro = formData.rol !== '' && !isEmprendedor && !isReferente;
+  const businessRoles = ['Emprendedor incipiente', 'Emprendedor en marcha', 'Empresario joven', 'Empresario maduro'];
+  
+  const hasBusinessRole = formData.roles.some(r => businessRoles.includes(r));
+  const isReferente = formData.roles.includes('Referente Institucional');
+  const isOtro = formData.roles.some(r => !businessRoles.includes(r) && r !== 'Referente Institucional');
 
   const menuItems = [
     { id: 1, title: '1. Información Básica' },
@@ -70,6 +73,18 @@ export default function RegistroPage() {
     });
   };
 
+  const handleAddRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value;
+    if (newRole && !formData.roles.includes(newRole)) {
+      setFormData(prev => ({ ...prev, roles: [...prev.roles, newRole] }));
+    }
+    e.target.value = ""; 
+  };
+
+  const handleRemoveRole = (roleToRemove: string) => {
+    setFormData(prev => ({ ...prev, roles: prev.roles.filter(r => r !== roleToRemove) }));
+  };
+
   const toggleSection = (section: number) => {
     setOpenSection(prev => prev === section ? 0 : section);
   };
@@ -79,27 +94,31 @@ export default function RegistroPage() {
     setError('');
     setSuccess(false);
 
-    // Validar contraseñas ------------------------------------ hay que poner todos los campos obligatorios!!
     if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden. Por favor, verifíquelas.');
-      setOpenSection(7);              //abre la sección de acceso para que el usuario chequee las passwords
+      setOpenSection(7);
       return;
     }
 
-    if (!dniFile) {
-      setError('La imagen del DNI es obligatoria.');
-      setOpenSection(1);              // Abre la sección 1 para que vea el error
+    if (formData.roles.length === 0) {
+      setError('Debes seleccionar al menos un rol en la sección de Perfil.');
+      setOpenSection(3);
+      return;
+    }
+
+    // Validación opcional: Si subió un archivo, verificar que no exceda los 10MB
+    if (cvFile && cvFile.size > 10 * 1024 * 1024) {
+      setError('El Curriculum Vitae excede el tamaño máximo permitido de 10 MB.');
+      setOpenSection(4);
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Crear el empaquetado especial para archivos y datos (FormData)
       const submitData = new FormData();
-      submitData.append('dniFile', dniFile);
 
-      // Agregamos todos los demás campos
+      // se agregan todos los datos de texto
       Object.entries(formData).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           submitData.append(key, JSON.stringify(value));
@@ -108,13 +127,14 @@ export default function RegistroPage() {
         }
       });
 
-      // Enviamos con Axios usando submitData
-      // Nota: Axios al ver 'submitData' pone automáticamente el Content-Type multipart/form-data
+      // se agrega el archivo CV si el usuario lo seleccionó
+      if (cvFile) {
+        submitData.append('cvFile', cvFile);
+      }
+
       const response = await api.post('/auth/register', submitData);
-      
       const data = response.data;
 
-      // JWT EN COOKIES
       const token = data.access_token || data.token;
       if (token) {
         document.cookie = `auth_token=${token}; path=/; max-age=604800; SameSite=Strict; Secure`;
@@ -127,7 +147,6 @@ export default function RegistroPage() {
       }, 2000);
 
     } catch (err: any) {
-      // Axios guarda los errores del backend en err.response.data
       const backendMessage = err.response?.data?.message;
       setError(backendMessage || 'Error al conectar con el servidor.');
     } finally {
@@ -207,10 +226,20 @@ export default function RegistroPage() {
                     <label className="block text-gray-700 text-xs font-bold mb-1">Fecha de nacimiento *</label>
                     <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
+                  
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">DNI *</label>
-                    <input type="text" name="dni" placeholder="Ej: 29333444" value={formData.dni} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Tipo de documento *</label>
+                    <select name="tipoDocumento" value={formData.tipoDocumento} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
+                      <option value="DNI">DNI</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                      <option value="Otro">Otro</option>
+                    </select>
                   </div>
+                  <div>
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Número de documento *</label>
+                    <input type="text" name="numeroDocumento" placeholder="Ej: 29333444" value={formData.numeroDocumento} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                  </div>
+
                   <div>
                     <label className="block text-gray-700 text-xs font-bold mb-1">CUIL/T *</label>
                     <input type="text" name="cuil" placeholder="Ej: 20293334445" value={formData.cuil} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
@@ -223,10 +252,6 @@ export default function RegistroPage() {
                       <option value="Femenino">Femenino</option>
                       <option value="Otro">Otro</option>
                     </select>
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Imagen del DNI (frente y reverso) *</label>
-                    <input type="file" name='dniFile' accept=".jpg,.png,.pdf" className="text-xs text-gray-500" onChange={(e) => setDniFile(e.target.files ? e.target.files[0] : null)}/>
                   </div>
                 </div>
               </div>
@@ -260,10 +285,6 @@ export default function RegistroPage() {
                     <label className="block text-gray-700 text-xs font-bold mb-1">Nacionalidad</label>
                     <input type="text" name="nacionalidad" value={formData.nacionalidad} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
-                  <div className="md:col-span-3">
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Certificación de domicilio *</label>
-                    <input type="file" accept=".jpg,.png,.pdf" className="text-xs text-gray-500" />
-                  </div>
                 </div>
               </div>
             </section>
@@ -275,120 +296,167 @@ export default function RegistroPage() {
                 <i className={`fas fa-chevron-${openSection === 3 ? 'up' : 'down'} text-gray-400`}></i>
               </button>
               <div className={`${openSection === 3 ? 'block' : 'hidden'} p-6 border-t border-blue-100 animate-fade-in bg-blue-50/10`}>
-                <div className="mb-6">
-                  <label className="block text-gray-800 text-sm font-bold mb-2">¿Con qué rol te identificas dentro del ecosistema? *</label>
-                  <select name="rol" value={formData.rol} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white shadow-sm font-medium">
-                    <option value="" disabled>-- Seleccionar Rol Principal --</option>
-                    <optgroup label="Emprendedor/a">
-                      <option value="Emprendedor incipiente">Emprendedor/a incipiente (Idea/Organizando)</option>
-                      <option value="Emprendedor en marcha">Emprendedor/a con empresa en marcha (-3 años)</option>
+                
+                {/* ETIQUETAS DE ROLES SELECCIONADOS */}
+                <div className="mb-6 border-b border-blue-200/50 pb-6">
+                  <label className="block text-gray-800 text-sm font-bold mb-3">Tus roles seleccionados *</label>
+                  
+                  {formData.roles.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {formData.roles.map(r => (
+                        <span key={r} className="bg-brand-teal text-white px-3 py-1.5 rounded-full text-sm flex items-center shadow-sm">
+                          {r}
+                          <button type="button" onClick={() => handleRemoveRole(r)} className="ml-2 text-white/80 hover:text-white transition">
+                            <i className="fas fa-times-circle"></i>
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 mb-4 italic bg-white p-3 rounded border border-dashed border-gray-300">
+                      Aún no has seleccionado ningún rol.
+                    </p>
+                  )}
+
+                  {/* SELECTOR DE ROLES */}
+                  <label className="block text-gray-800 text-xs font-bold mb-2 text-gray-500">Añadir otro rol a tu perfil</label>
+                  <select 
+                    value="" 
+                    onChange={handleAddRole} 
+                    className="w-full md:w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white shadow-sm font-medium focus:ring-2 focus:ring-brand-teal focus:border-brand-teal"
+                  >
+                    <option value="" disabled>-- Seleccionar Rol --</option>
+                    
+                    <optgroup label="Emprendedor/a o Empresario/a">
+                      <option value="Emprendedor incipiente" disabled={hasBusinessRole}>
+                        Emprendedor/a incipiente (Idea/Organizando)
+                      </option>
+                      <option value="Emprendedor en marcha" disabled={hasBusinessRole}>
+                        Emprendedor/a con empresa en marcha (-3 años)
+                      </option>
+                      <option value="Empresario joven" disabled={hasBusinessRole}>
+                        Empresario/a joven (3 a 15 años)
+                      </option>
+                      <option value="Empresario maduro" disabled={hasBusinessRole}>
+                        Empresario/a maduro (+15 años)
+                      </option>
                     </optgroup>
-                    <optgroup label="Empresario/a">
-                      <option value="Empresario joven">Empresario/a joven (3 a 15 años)</option>
-                      <option value="Empresario maduro">Empresario/a maduro (+15 años)</option>
-                    </optgroup>
+                    
                     <optgroup label="Otros Roles">
-                      <option value="Docente o Facilitador">Docente / Facilitador/a</option>
-                      <option value="Investigador">Investigador/a</option>
-                      <option value="Consultor">Consultor/a</option>
-                      <option value="Mentor">Mentor/a</option>
-                      <option value="Tutor">Tutor/a</option>
-                      <option value="Estudiante">Estudiante</option>
-                      <option value="Inversor">Inversor/a</option>
-                      <option value="Jurado">Jurado</option>
-                      <option value="Referente Institucional">Referente institucional</option>
-                      <option value="Evaluador">Evaluador/a</option>
-                      <option value="Otro">Otro</option>
+                      <option value="Docente o Facilitador" disabled={formData.roles.includes('Docente o Facilitador')}>Docente / Facilitador/a</option>
+                      <option value="Investigador" disabled={formData.roles.includes('Investigador')}>Investigador/a</option>
+                      <option value="Consultor" disabled={formData.roles.includes('Consultor')}>Consultor/a</option>
+                      <option value="Mentor" disabled={formData.roles.includes('Mentor')}>Mentor/a</option>
+                      <option value="Tutor" disabled={formData.roles.includes('Tutor')}>Tutor/a</option>
+                      <option value="Estudiante" disabled={formData.roles.includes('Estudiante')}>Estudiante</option>
+                      <option value="Inversor" disabled={formData.roles.includes('Inversor')}>Inversor/a</option>
+                      <option value="Jurado" disabled={formData.roles.includes('Jurado')}>Jurado</option>
+                      <option value="Referente Institucional" disabled={formData.roles.includes('Referente Institucional')}>Referente institucional</option>
+                      <option value="Evaluador" disabled={formData.roles.includes('Evaluador')}>Evaluador/a</option>
+                      <option value="Otro" disabled={formData.roles.includes('Otro')}>Otro</option>
                     </optgroup>
                   </select>
+                  
+                  {hasBusinessRole && (
+                    <p className="text-xs text-brand-dark mt-2 bg-blue-50 inline-block px-2 py-1 rounded border border-blue-100">
+                      <i className="fas fa-info-circle mr-1"></i> 
+                      Has seleccionado un rol de negocio. Se tomará este como tu nivel máximo de experiencia.
+                    </p>
+                  )}
                 </div>
 
-                {isEmprendedor && (
-                  <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-teal">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-gray-700 text-xs font-bold mb-1">¿Tiene una empresa en marcha actualmente?</label>
-                        <select name="empresaEnMarcha" value={formData.empresaEnMarcha} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
-                          <option value="">Seleccionar</option>
-                          <option value="Si">Sí</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 text-xs font-bold mb-1">Cantidad de años en marcha / fecha inicio</label>
-                        <input type="text" name="fechaInicioEmpresa" value={formData.fechaInicioEmpresa} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" placeholder="Ej: 2 años / 15-04-2022" />
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 text-xs font-bold mb-1">¿Tuviste experiencias emprendedoras previas?</label>
-                        <select name="experienciaPrevia" value={formData.experienciaPrevia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
-                          <option value="">Seleccionar</option>
-                          <option value="Si">Sí</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-gray-700 text-xs font-bold mb-2">¿Cuál fue tu principal motivación para emprender?</label>
-                        <div className="space-y-2 text-sm">
-                          {['Necesidad económica (no disponía de ingresos)', 'Generación de ingresos adicionales', 'Autorrealización / Satisfacción personal', 'Autonomía o independencia'].map(opt => (
-                            <label key={opt} className="flex items-center text-gray-600">
-                              <input type="radio" name="motivacionEmprender" value={opt} onChange={handleChange} checked={formData.motivacionEmprender === opt} className="mr-2 text-brand-teal focus:ring-brand-teal" /> {opt}
-                            </label>
-                          ))}
+                {/* FORMULARIOS DINÁMICOS SEGÚN ROLES SELECCIONADOS */}
+                <div className="space-y-6">
+                  {hasBusinessRole && (
+                    <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-teal">
+                      <h4 className="text-brand-teal font-bold text-sm mb-2"><i className="fas fa-briefcase"></i> Datos de Emprendimiento/Empresa</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-gray-700 text-xs font-bold mb-1">¿Tiene una empresa en marcha actualmente?</label>
+                          <select name="empresaEnMarcha" value={formData.empresaEnMarcha} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
+                            <option value="">Seleccionar</option>
+                            <option value="Si">Sí</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 text-xs font-bold mb-1">Cantidad de años en marcha / fecha inicio</label>
+                          <input type="text" name="fechaInicioEmpresa" value={formData.fechaInicioEmpresa} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" placeholder="Ej: 2 años / 15-04-2022" />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 text-xs font-bold mb-1">¿Tuviste experiencias emprendedoras previas?</label>
+                          <select name="experienciaPrevia" value={formData.experienciaPrevia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
+                            <option value="">Seleccionar</option>
+                            <option value="Si">Sí</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-gray-700 text-xs font-bold mb-2">¿Cuál fue tu principal motivación para emprender?</label>
+                          <div className="space-y-2 text-sm">
+                            {['Necesidad económica (no disponía de ingresos)', 'Generación de ingresos adicionales', 'Autorrealización / Satisfacción personal', 'Autonomía o independencia'].map(opt => (
+                              <label key={opt} className="flex items-center text-gray-600">
+                                <input type="radio" name="motivacionEmprender" value={opt} onChange={handleChange} checked={formData.motivacionEmprender === opt} className="mr-2 text-brand-teal focus:ring-brand-teal" /> {opt}
+                              </label>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {isReferente && (
-                  <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-magenta">
-                    <div>
-                      <label className="block text-gray-700 text-xs font-bold mb-2">¿A qué institución pertenece?</label>
-                      <select name="institucionReferente" value={formData.institucionReferente} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white">
-                        <option value="">Seleccionar institución...</option>
-                        <option value="Desarrollo Local e Inversiones MGP">Desarrollo Local e Inversiones MGP</option>
-                        <option value="UNMDP">UNMDP</option>
-                        <option value="ATICMA">ATICMA</option>
-                        <option value="Universidad Atlántida">Universidad Atlántida</option>
-                        <option value="Otra">Otra...</option>
-                      </select>
+                  {isReferente && (
+                    <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-magenta">
+                      <h4 className="text-brand-magenta font-bold text-sm mb-2"><i className="fas fa-building"></i> Datos de Institución (Referente)</h4>
+                      <div>
+                        <label className="block text-gray-700 text-xs font-bold mb-2">¿A qué institución pertenece?</label>
+                        <select name="institucionReferente" value={formData.institucionReferente} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white">
+                          <option value="">Seleccionar institución...</option>
+                          <option value="Desarrollo Local e Inversiones MGP">Desarrollo Local e Inversiones MGP</option>
+                          <option value="UNMDP">UNMDP</option>
+                          <option value="ATICMA">ATICMA</option>
+                          <option value="Universidad Atlántida">Universidad Atlántida</option>
+                          <option value="Otra">Otra...</option>
+                        </select>
+                      </div>
+                      {formData.institucionReferente === 'Otra' && (
+                        <div>
+                          <input type="text" name="otraInstitucion" value={formData.otraInstitucion} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white" placeholder="Especifique la institución" />
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-gray-700 text-xs font-bold mb-1">Breve descripción de servicios ofrecidos</label>
+                          <textarea name="serviciosOfrecidos" value={formData.serviciosOfrecidos} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" rows={2}></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 text-xs font-bold mb-1">Servicios aportados a la Red INTECMAR</label>
+                          <textarea name="serviciosAportados" value={formData.serviciosAportados} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" rows={2}></textarea>
+                        </div>
+                      </div>
                     </div>
-                    {formData.institucionReferente === 'Otra' && (
-                      <div>
-                        <input type="text" name="otraInstitucion" value={formData.otraInstitucion} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white" placeholder="Especifique la institución" />
-                      </div>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-gray-700 text-xs font-bold mb-1">Breve descripción de servicios ofrecidos</label>
-                        <textarea name="serviciosOfrecidos" value={formData.serviciosOfrecidos} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" rows={2}></textarea>
-                      </div>
-                      <div>
-                        <label className="block text-gray-700 text-xs font-bold mb-1">Servicios aportados a la Red INTECMAR</label>
-                        <textarea name="serviciosAportados" value={formData.serviciosAportados} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" rows={2}></textarea>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {(isOtro || isReferente) && (
-                  <div className="mt-6 animate-fade-in pl-4 border-l-2 border-gray-400">
-                    <label className="block text-gray-700 text-xs font-bold mb-3">¿Cuál es tu principal motivación para participar en el ecosistema? (Selección múltiple)</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
-                      {[
-                        'Compartir conocimientos y experiencias', 'Contribuir al desarrollo de nuevos proyectos',
-                        'Apoyar a emprendedores desde mi experiencia', 'Aprender y adquirir nuevas competencias',
-                        'Generar vínculos y redes de colaboración', 'Detectar oportunidades de inversión',
-                        'Promover la cultura emprendedora desde mi institución'
-                      ].map(mot => (
-                        <label key={mot} className="flex items-start">
-                          <input type="checkbox" checked={formData.motivacionesParticipar.includes(mot)} onChange={() => handleArrayChange('motivacionesParticipar', mot)} className="mt-1 mr-2 text-brand-teal rounded focus:ring-brand-teal" /> 
-                          <span className="leading-tight">{mot}</span>
-                        </label>
-                      ))}
+                  {isOtro && (
+                    <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-gray-400">
+                      <h4 className="text-gray-600 font-bold text-sm mb-2"><i className="fas fa-users"></i> Motivaciones de Participación</h4>
+                      <label className="block text-gray-700 text-xs font-bold mb-3">¿Cuál es tu principal motivación para participar en el ecosistema? (Selección múltiple)</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                        {[
+                          'Compartir conocimientos y experiencias', 'Contribuir al desarrollo de nuevos proyectos',
+                          'Apoyar a emprendedores desde mi experiencia', 'Aprender y adquirir nuevas competencias',
+                          'Generar vínculos y redes de colaboración', 'Detectar oportunidades de inversión',
+                          'Promover la cultura emprendedora desde mi institución'
+                        ].map(mot => (
+                          <label key={mot} className="flex items-start">
+                            <input type="checkbox" checked={formData.motivacionesParticipar.includes(mot)} onChange={() => handleArrayChange('motivacionesParticipar', mot)} className="mt-1 mr-2 text-brand-teal rounded focus:ring-brand-teal" /> 
+                            <span className="leading-tight">{mot}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </section>
 
@@ -428,10 +496,10 @@ export default function RegistroPage() {
 
                 <div className="mb-4">
                   <label className="block text-gray-700 text-xs font-bold mb-3">
-                    {isEmprendedor ? 'Cursos realizados (Selección múltiple)' : 'Cursos realizados relacionados con el acompañamiento a emprendedores:'}
+                    {hasBusinessRole ? 'Cursos realizados (Selección múltiple)' : 'Cursos realizados relacionados con el acompañamiento a emprendedores:'}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                    {isEmprendedor ? (
+                    {hasBusinessRole ? (
                       ['Gestión de proyectos', 'Modelo de negocios / CANVAS', 'Lean Startup / Design Thinking', 'Marketing digital', 'Finanzas', 'Innovación y transferencia', 'Habilidades blandas', 'Economía circular', 'Propiedad intelectual'].map(curso => (
                         <label key={curso} className="flex items-start">
                           <input type="checkbox" checked={formData.cursos.includes(curso)} onChange={() => handleArrayChange('cursos', curso)} className="mt-1 mr-2 text-brand-teal rounded" /> <span className="leading-tight">{curso}</span>
@@ -446,9 +514,15 @@ export default function RegistroPage() {
                     )}
                   </div>
                 </div>
-                <div>
-                  <label className="block text-gray-700 text-xs font-bold mb-1">CV (Opcional - Máx 10 MB)</label>
-                  <input type="file" accept=".pdf" className="text-xs text-gray-500" />
+                <div className="mt-6 border-t border-gray-100 pt-4">
+                  <label className="block text-gray-700 text-xs font-bold mb-1">Curriculum Vitae (Opcional)</label>
+                  <p className="text-xs text-gray-500 mb-2">Formato: PDF. Máx. 10 MB.</p>
+                  <input 
+                    type="file" 
+                    accept=".pdf" 
+                    onChange={(e) => setCvFile(e.target.files ? e.target.files[0] : null)}
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand-teal/10 file:text-brand-teal hover:file:bg-brand-teal/20 transition cursor-pointer border border-gray-200 rounded-full bg-gray-50 p-1" 
+                  />
                 </div>
               </div>
             </section>

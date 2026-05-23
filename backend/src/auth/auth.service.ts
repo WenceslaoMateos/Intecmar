@@ -45,8 +45,8 @@ export class AuthService {
      * numero de doc
      * cuil/cuit
      * cv
-     * ----genero
-     * domicilio
+     * genero
+     * ----domicilio
      * ----localidad
      * ----partido
      * ----provincia
@@ -61,7 +61,7 @@ export class AuthService {
     try {
       newUser = await this.dataSource.query(
         // Actualizamos a 9 signos de interrogación para incluir el CV
-        'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+        'CALL userCreate(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
         [
           userData.email, 
           hashedPassword, 
@@ -71,6 +71,7 @@ export class AuthService {
           userData.cuilCuit, 
           userData.typeDocument, 
           userData.numberDocument,
+          userData.gender,
           savedCvFileName // Pasamos el string del archivo o 'null'
         ] 
       );

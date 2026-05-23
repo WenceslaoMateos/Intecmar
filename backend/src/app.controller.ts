@@ -5,14 +5,18 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('roles')
+  getRoles() {
+    return this.appService.getRoles();
   }
 
-  // --- Nuevo Endpoint ---
-  @Get('test-db') 
-  async testDb() {
-    return this.appService.getDbTest();
+  @Get('type_documents')
+  getDocumentTypes() {
+    return this.appService.getDocumentTypes();
+  }
+
+  @Get('genders')
+  getGenders() {
+    return this.appService.getGenders();
   }
 }

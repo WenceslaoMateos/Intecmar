@@ -7,15 +7,33 @@ CREATE TABLE `User`
     lastName varchar(100),
     birthDate date,
     cuilCuit varchar(11),
-    dni int,
+    documentType int, 
+    numberDocument varchar(50),
     uidDNIFile varchar(50),
+    gender int,,
+    cvFileName varchar(255),
 
-    PRIMARY KEY (id_user)
+    PRIMARY KEY (id_user),
+    FOREIGN KEY (documentType) REFERENCES DocumentType (id_DocumentType),
+    FOREIGN KEY (gender) REFERENCES Gender(id_gender)
+);
+
+create table Gender (
+    id_gender INT AUTO_INCREMENT,
+    `description`varchar(255) not null,
+    PRIMARY KEY (id_gender)
+);|
+
+create table DocumentType (
+    id_DocumentType INT AUTO_INCREMENT,
+    `description`varchar(255) not null,
+    PRIMARY KEY (id_DocumentType)
 );
 
 CREATE TABLE `Role`(
     id_role INT AUTO_INCREMENT,
     `name` varchar(100),
+    `description` text default null,
     public boolean default TRUE,
 
     PRIMARY KEY (id_role)
@@ -36,7 +54,7 @@ CREATE TABLE UsersXRol(
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
 
-insert into User(email, `password`)
+insert into `User`(email, `password`)
 values 
 ('wenceslaomateos@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
 ('paulabonifazi@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
@@ -60,6 +78,20 @@ VALUES
 ('Referente Institucional', TRUE),
 ('Evaluador/a', TRUE);
 
+insert into gender(description)
+values
+('Femenino'),
+('Masculino'),
+('Otro');
+
+insert into DocumentType(description)
+values
+('DNI'),
+('Pasaporte'),
+('Otro');
+
+/************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************/
 
 DELIMITER $$
 
@@ -79,20 +111,40 @@ CREATE PROCEDURE userCreate(
     IN p_lastName VARCHAR(100),
     IN p_birthDate DATE,
     IN p_cuilCuit VARCHAR(11),
-    IN p_dni INT,
-    IN p_uidDNIFile VARCHAR(50)
+    IN p_DocumentType INT,
+    IN p_numberDocument VARCHAR(50),
+    IN p_gender INT,
+    IN p_cvFileName VARCHAR(255)
 )
 BEGIN
-    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, dni, uidDNIFile)
-    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_dni, p_uidDNIFile);
+    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName)
+    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName);
 
     SELECT LAST_INSERT_ID() AS id_user;
 END $$
 
 CREATE PROCEDURE listRoles()
 BEGIN
-    SELECT * 
-    FROM `Role`;
+    SELECT `name`, `description` 
+    FROM `Role`
+    WHERE public = TRUE;
 END $$
+
+CREATE PROCEDURE getDocumentTypes ()
+BEGIN
+	SELECT 
+        id_DocumentType,
+		description
+	FROM DocumentType;
+END $$
+
+CREATE PROCEDURE getGenders ()
+
+BEGIN
+	SELECT id_gender,
+		description
+	FROM Gender;
+END $$
+
 
 DELIMITER ;

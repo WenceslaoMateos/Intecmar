@@ -19,7 +19,7 @@ export default function RegistroPage() {
     nombre: '', apellido: '', fechaNacimiento: '', 
     tipoDocumento: '', numeroDocumento: '', 
     cuil: '', genero: '',
-    domicilio: '', localidad: '', partido: '', provincia: '', nacionalidad: '',
+    domicilio: '', localidad: '', partido: '', provincia: '', pais: '',
     roles: [] as string[], 
     empresaEnMarcha: '', fechaInicioEmpresa: '', experienciaPrevia: '', motivacionEmprender: '', 
     institucionReferente: '', otraInstitucion: '', serviciosOfrecidos: '', serviciosAportados: '', 
@@ -36,6 +36,7 @@ export default function RegistroPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [openSection, setOpenSection] = useState<number>(1);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [showRoleGuide, setShowRoleGuide] = useState(false);
 
   // =========================================================================
   // 1.5 FETCH DE DATOS AL CARGAR LA PÁGINA
@@ -43,8 +44,6 @@ export default function RegistroPage() {
   useEffect(() => {
     const fetchCatalogos = async () => {
       try {
-        // ATENCIÓN BACKEND: Reemplazar estas rutas por las reales que armó tu compañero
-        // Ej: puede que él las haya puesto como '/api/roles' o '/roles'
         const [resRoles, resDocs, resGenders, resInst] = await Promise.all([
           api.get('/roles').catch(() => ({ data: [] })), 
           api.get('/type_documents').catch(() => ({ data: [] })),
@@ -52,34 +51,24 @@ export default function RegistroPage() {
           api.get('/institutions').catch(() => ({ data: [] }))
         ]);
 
-        setRolesDB(resRoles.data);
-        setDocsDB(resDocs.data);
-        setGendersDB(resGenders.data);
-        setInstitutionsDB(resInst.data);
+        setRolesDB(resRoles.data || []);
+        setDocsDB(resDocs.data || []);
+        setGendersDB(resGenders.data || []);
+        setInstitutionsDB(resInst.data || []);
       } catch (err) {
-        console.error("Error al cargar datos desde la BD", err);
+        console.error("Error al cargar catálogos desde la BD", err);
       }
     };
     fetchCatalogos();
   }, []);
   
   // =========================================================================
-  // 2. LÓGICA CONDICIONAL DE ROLES (Adaptada a IDs dinámicos)
+  // 2. LÓGICA CONDICIONAL DE ROLES
   // =========================================================================
-  // Función auxiliar para obtener el nombre del rol a partir de su ID guardado en formData
-  const getRoleName = (roleId: string) => {
-    // Buscamos coincidencia (soportando id o id_role dependiendo de cómo lo mande la BD)
-    const role = rolesDB.find(r => String(r.id) === roleId || String(r.id_role) === roleId);
-    return role ? (role.name || role.nombre || '') : '';
-  };
-
-  const businessRoles = ['Emprendedor incipiente', 'Emprendedor en marcha', 'Empresario joven', 'Empresario maduro'];
-  
-  const hasBusinessRole = formData.roles.some(roleId => businessRoles.includes(getRoleName(roleId)));
-  const isReferente = formData.roles.some(roleId => getRoleName(roleId).includes('Referente Institucional'));
-  const isOtro = formData.roles.some(roleId => {
-    const name = getRoleName(roleId);
-    return !businessRoles.includes(name) && !name.includes('Referente Institucional');
+  const hasBusinessRole = formData.roles.some(roleName => roleName.includes('Emprendedor') || roleName.includes('Empresario'));
+  const isReferente = formData.roles.some(roleName => roleName.includes('Referente Institucional'));
+  const isOtro = formData.roles.some(roleName => {
+    return !roleName.includes('Emprendedor') && !roleName.includes('Empresario') && !roleName.includes('Referente Institucional');
   });
 
   const menuItems = [
@@ -118,7 +107,7 @@ export default function RegistroPage() {
   };
 
   const handleAddRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newRoleId = e.target.value; // guarda el ID del rol
+    const newRoleId = e.target.value; 
     if (newRoleId && !formData.roles.includes(newRoleId)) {
       setFormData(prev => ({ ...prev, roles: [...prev.roles, newRoleId] }));
     }
@@ -161,20 +150,19 @@ export default function RegistroPage() {
     try {
       const submitData = new FormData();
 
-      // Mapeo EXACTO de variables como las espera el Backend 
       submitData.append('firstName', formData.nombre);
       submitData.append('lastName', formData.apellido);
       submitData.append('email', formData.email);
       submitData.append('password', formData.password);
       submitData.append('birthDate', formData.fechaNacimiento);
-      submitData.append('typeDocument', formData.tipoDocumento); // ID del tipo de doc
+      submitData.append('typeDocument', formData.tipoDocumento); 
       submitData.append('numberDocument', formData.numeroDocumento);
       submitData.append('cuilCuit', formData.cuil);
-      submitData.append('gender', formData.genero); // ID del género
-      submitData.append('roles', JSON.stringify(formData.roles)); // Array de IDs
+      submitData.append('gender', formData.genero); 
+      submitData.append('roles', JSON.stringify(formData.roles)); 
       
       if (isReferente) {
-        submitData.append('institucionReferente', formData.institucionReferente); // ID de la institución
+        submitData.append('institucionReferente', formData.institucionReferente);
       }
 
       if (cvFile) {
@@ -280,8 +268,8 @@ export default function RegistroPage() {
                     <select name="tipoDocumento" value={formData.tipoDocumento} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
                       <option value="" disabled>Seleccionar</option>
                       {docTypesDB.map((doc: any) => (
-                        <option key={doc.id || doc.id_documentType} value={doc.id || doc.id_documentType}>
-                          {doc.description || doc.nombre}
+                        <option key={doc.id_DocumentType} value={doc.id_DocumentType}>
+                          {doc.description}
                         </option>
                       ))}
                     </select>
@@ -295,12 +283,15 @@ export default function RegistroPage() {
                     <label className="block text-gray-700 text-xs font-bold mb-1">CUIL/T *</label>
                     <input type="text" name="cuil" placeholder="Ej: 20293334445" value={formData.cuil} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
+                  
                   <div>
                     <label className="block text-gray-700 text-xs font-bold mb-1">Género *</label>
                     <select name="genero" value={formData.genero} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
                       <option value="" disabled>Seleccionar</option>
                       {gendersDB.map((gen: any) => (
-                        <option key={gen.id_gender} value={gen.id_gender}>{gen.description}</option>
+                        <option key={gen.id_gender} value={gen.id_gender}>
+                          {gen.description}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -316,25 +307,21 @@ export default function RegistroPage() {
               </button>
               <div className={`${openSection === 2 ? 'block' : 'hidden'} p-6 border-t border-gray-200 animate-fade-in`}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Domicilio (Calle / Número) *</label>
-                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
-                  </div>
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Localidad *</label>
-                    <input type="text" name="localidad" value={formData.localidad} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido *</label>
-                    <input type="text" name="partido" value={formData.partido} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Pais</label>
+                    <input type="text" name="pais" value={formData.pais} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
                   <div>
                     <label className="block text-gray-700 text-xs font-bold mb-1">Provincia *</label>
                     <input type="text" name="provincia" value={formData.provincia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Nacionalidad</label>
-                    <input type="text" name="nacionalidad" value={formData.nacionalidad} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido *</label>
+                    <input type="text" name="partido" value={formData.partido} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Domicilio (Calle / Número) *</label>
+                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
                   </div>
                 </div>
               </div>
@@ -347,30 +334,37 @@ export default function RegistroPage() {
                 <i className={`fas fa-chevron-${openSection === 3 ? 'up' : 'down'} text-gray-400`}></i>
               </button>
               <div className={`${openSection === 3 ? 'block' : 'hidden'} p-6 border-t border-blue-100 animate-fade-in bg-blue-50/10`}>
-                
-                {/* ETIQUETAS DE ROLES SELECCIONADOS */}
                 <div className="mb-6 border-b border-blue-200/50 pb-6">
                   <label className="block text-gray-800 text-sm font-bold mb-3">Tus roles seleccionados *</label>
                   
                   {formData.roles.length > 0 ? (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {formData.roles.map(roleId => (
-                        <span key={roleId} className="bg-brand-teal text-white px-3 py-1.5 rounded-full text-sm flex items-center shadow-sm">
-                          {getRoleName(roleId)}
-                          <button type="button" onClick={() => handleRemoveRole(roleId)} className="ml-2 text-white/80 hover:text-white transition">
+                      {formData.roles.map(roleName => (
+                        <span key={roleName} className="bg-brand-teal text-white px-3 py-1.5 rounded-full text-sm flex items-center shadow-sm">
+                          {roleName}
+                          <button type="button" onClick={() => handleRemoveRole(roleName)} className="ml-2 text-white/80 hover:text-white transition">
                             <i className="fas fa-times-circle"></i>
                           </button>
                         </span>
                       ))}
                     </div>
-                  ) : (
+                   ) : (
                     <p className="text-sm text-gray-500 mb-4 italic bg-white p-3 rounded border border-dashed border-gray-300">
                       Aún no has seleccionado ningún rol.
                     </p>
                   )}
+                  
+                  <div className="flex justify-between items-end mb-2">
+                    <label className="block text-gray-800 text-xs font-bold text-gray-500">Añadir otro rol a tu perfil</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowRoleGuide(true)}
+                      className="text-xs text-brand-teal hover:text-brand-dark transition font-medium flex items-center bg-blue-50/50 hover:bg-blue-100 px-2 py-1 rounded shadow-sm"
+                    >
+                      <i className="fas fa-question-circle mr-1"></i> ¿Qué es cada rol?
+                    </button>
+                  </div>
 
-                  {/* SELECT DINÁMICO: ROLES */}
-                  <label className="block text-gray-800 text-xs font-bold mb-2 text-gray-500">Añadir otro rol a tu perfil</label>
                   <select 
                     value="" 
                     onChange={handleAddRole} 
@@ -378,15 +372,13 @@ export default function RegistroPage() {
                   >
                     <option value="" disabled>-- Seleccionar Rol --</option>
                     {rolesDB.map((rol: any) => {
-                      const id = String(rol.id || rol.id_role);
-                      const name = rol.description || rol.nombre;
-                      const isBusiness = businessRoles.includes(name);
+                      const name = rol.name;
+                      const isBusiness = name.includes('Emprendedor') || name.includes('Empresario');
                       
-                      // Deshabilitar si ya se eligió este rol, o si es un rol de negocio y ya hay otro rol de negocio elegido
-                      const isDisabled = formData.roles.includes(id) || (isBusiness && hasBusinessRole);
+                      const isDisabled = formData.roles.includes(name) || (isBusiness && hasBusinessRole);
 
                       return (
-                        <option key={id} value={id} disabled={isDisabled}>
+                        <option key={name} value={name} disabled={isDisabled}>
                           {name}
                         </option>
                       );
@@ -400,8 +392,6 @@ export default function RegistroPage() {
                     </p>
                   )}
                 </div>
-
-                {/* FORMULARIOS DINÁMICOS SEGÚN ROLES SELECCIONADOS */}
                 <div className="space-y-6">
                   {hasBusinessRole && (
                     <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-teal">
@@ -445,16 +435,14 @@ export default function RegistroPage() {
                     <div className="space-y-4 animate-fade-in pl-4 border-l-2 border-brand-magenta">
                       <h4 className="text-brand-magenta font-bold text-sm mb-2"><i className="fas fa-building"></i> Datos de Institución (Referente)</h4>
                       <div>
-                        {/* SELECT DINÁMICO: INSTITUCIONES */}
                         <label className="block text-gray-700 text-xs font-bold mb-2">¿A qué institución pertenece?</label>
                         <select name="institucionReferente" value={formData.institucionReferente} onChange={handleChange} className="w-full md:w-1/2 px-3 py-2 text-sm border rounded bg-white">
                           <option value="">Seleccionar institución...</option>
                           {institutionsDB.map((inst: any) => (
-                            <option key={inst.id || inst.id_institution} value={inst.id || inst.id_institution}>
-                              {inst.name || inst.nombre}
+                            <option key={inst.id_institution} value={inst.id_institution}>
+                              {inst.name}
                             </option>
                           ))}
-                          <option value="Otra">Otra...</option>
                         </select>
                       </div>
                       {formData.institucionReferente === 'Otra' && (
@@ -662,6 +650,56 @@ export default function RegistroPage() {
           </form>
         </div>
       </div>
+
+      {/* --- MODAL: GUÍA DE ROLES --- */}
+      {showRoleGuide && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in"
+          onClick={() => setShowRoleGuide(false)} 
+        >
+          <div 
+            className="bg-white rounded-2xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative flex flex-col max-h-[90vh]" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón Cerrar */}
+            <button 
+              onClick={() => setShowRoleGuide(false)} 
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            
+            {/* Cabecera del Modal */}
+            <div className="mb-6 border-b border-gray-100 pb-4 pr-8 shrink-0">
+              <h3 className="text-2xl font-bold font-heading text-gray-800">Guía de Roles</h3>
+              <p className="text-sm text-gray-500 mt-1">Conoce en detalle qué significa cada rol dentro del ecosistema de Intecmar.</p>
+            </div>
+            
+            {/* Lista Scrolleable (El .map de las descripciones) */}
+            <div className="overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+              {rolesDB.map((rol: any, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-brand-teal/30 transition">
+                  <h4 className="font-bold text-brand-teal text-base mb-1">{rol.name}</h4>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {rol.description || 'Sin descripción disponible.'}
+                  </p>
+                </div>
+              ))}
+            </div>
+            
+            {/* Pie del Modal */}
+            <div className="pt-6 mt-2 border-t border-gray-100 flex justify-end shrink-0">
+              <button 
+                onClick={() => setShowRoleGuide(false)}
+                className="px-6 py-2.5 bg-brand-dark text-white text-sm font-bold rounded-lg hover:bg-gray-800 transition shadow-md"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

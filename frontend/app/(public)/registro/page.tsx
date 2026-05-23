@@ -11,6 +11,10 @@ export default function RegistroPage() {
   const [docTypesDB, setDocsDB] = useState<any[]>([]);
   const [gendersDB, setGendersDB] = useState<any[]>([]);
   const [institutionsDB, setInstitutionsDB] = useState<any[]>([]);
+  const [countriesDB, setCountriesDB] = useState<any[]>([]);
+  const [provincesDB, setProvincesDB] = useState<any[]>([]);
+  const [countiesDB, setCountiesDB] = useState<any[]>([]);
+  const [citiesDB, setCitiesDB] = useState<any[]>([]);
 
   // =========================================================================
   // 1. ESTADO UNIFICADO DEL FORMULARIO
@@ -62,6 +66,28 @@ export default function RegistroPage() {
     fetchCatalogos();
   }, []);
   
+  // EFECTO EN CASCADA: Si cambia la Provincia, buscamos sus Partidos
+  useEffect(() => {
+    if (formData.provincia) {
+      api.get(`/counties/${formData.provincia}`)
+         .then(res => setCountiesDB(res.data || []))
+         .catch(err => console.error("Error cargando partidos", err));
+    } else {
+      setCountiesDB([]); // Si borra la provincia, vaciamos la lista de partidos
+    }
+  }, [formData.provincia]);
+
+  // EFECTO EN CASCADA: Si cambia el Partido, buscamos sus Localidades
+  useEffect(() => {
+    if (formData.partido) {
+      api.get(`/cities/${formData.partido}`)
+         .then(res => setCitiesDB(res.data || []))
+         .catch(err => console.error("Error cargando localidades", err));
+    } else {
+      setCitiesDB([]);
+    }
+  }, [formData.partido]);
+
   // =========================================================================
   // 2. LÓGICA CONDICIONAL DE ROLES
   // =========================================================================
@@ -91,7 +117,15 @@ export default function RegistroPage() {
       const target = e.target as HTMLInputElement;
       setFormData(prev => ({ ...prev, [name]: target.checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      if (name === 'provincia') {
+        // Si cambia la provincia, borramos el partido y la localidad que había elegido
+        setFormData(prev => ({ ...prev, provincia: value, partido: '', localidad: '' }));
+      } else if (name === 'partido') {
+        // Si cambia el partido, borramos la localidad
+        setFormData(prev => ({ ...prev, partido: value, localidad: '' }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
   };
 
@@ -306,23 +340,66 @@ export default function RegistroPage() {
                 <i className={`fas fa-chevron-${openSection === 2 ? 'up' : 'down'} text-gray-400`}></i>
               </button>
               <div className={`${openSection === 2 ? 'block' : 'hidden'} p-6 border-t border-gray-200 animate-fade-in`}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Pais</label>
-                    <input type="text" name="pais" value={formData.pais} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  
+                  {/* País */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-gray-700 text-xs font-bold mb-1">País *</label>
+                    <select name="pais" value={formData.pais} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
+                      <option value="" disabled>Seleccionar País...</option>
+                      {countriesDB.map((country: any) => (
+                        <option key={country.id || country.id_country} value={country.id || country.id_country}>
+                          {country.name || country.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div>
+
+                  {/* Provincia */}
+                  <div className="lg:col-span-2">
                     <label className="block text-gray-700 text-xs font-bold mb-1">Provincia *</label>
-                    <input type="text" name="provincia" value={formData.provincia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                    <select name="provincia" value={formData.provincia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
+                      <option value="" disabled>Seleccionar Provincia...</option>
+                      {provincesDB.map((prov: any) => (
+                        <option key={prov.id || prov.id_province} value={prov.id || prov.id_province}>
+                          {prov.name || prov.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div>
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido *</label>
-                    <input type="text" name="partido" value={formData.partido} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+
+                  {/* Partido (Bloqueado si no hay provincia) */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido  *</label>
+                    <select name="partido" value={formData.partido} onChange={handleChange} disabled={!formData.provincia} className="w-full px-3 py-2 text-sm border rounded bg-white disabled:bg-gray-100 disabled:text-gray-400">
+                      <option value="" disabled>{formData.provincia ? 'Seleccionar Partido...' : 'Primero seleccione Provincia'}</option>
+                      {countiesDB.map((county: any) => (
+                        <option key={county.id || county.id_county} value={county.id || county.id_county}>
+                          {county.name || county.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="md:col-span-2">
+
+                  {/* Localidad (Bloqueado si no hay partido) */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Localidad / Ciudad *</label>
+                    <select name="localidad" value={formData.localidad} onChange={handleChange} disabled={!formData.partido} className="w-full px-3 py-2 text-sm border rounded bg-white disabled:bg-gray-100 disabled:text-gray-400">
+                      <option value="" disabled>{formData.partido ? 'Seleccionar Localidad...' : 'Primero seleccione Partido'}</option>
+                      {citiesDB.map((city: any) => (
+                        <option key={city.id || city.id_city} value={city.id || city.id_city}>
+                          {city.name || city.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Domicilio (Calle y Número) */}
+                  <div className="lg:col-span-4 mt-2">
                     <label className="block text-gray-700 text-xs font-bold mb-1">Domicilio (Calle / Número) *</label>
-                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" />
+                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" placeholder="Ej: Av. Luro 3000" />
                   </div>
+                  
                 </div>
               </div>
             </section>

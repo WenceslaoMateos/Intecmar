@@ -25,7 +25,7 @@ export class AppController {
     ) file: Express.Multer.File
   ) {
     // We now pass both the text body and the file to your service
-    return this.authService.register(body, file);
+    return this.appService.register(body, file);
   }
   
   @Get('roles')

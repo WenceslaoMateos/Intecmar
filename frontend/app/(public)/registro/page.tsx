@@ -113,6 +113,12 @@ export default function RegistroPage() {
       return;
     }
 
+    // 2. Validate File existence
+    if (!dniFile) {
+      setError('La imagen del DNI es obligatoria.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -153,7 +159,6 @@ export default function RegistroPage() {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-4 flex justify-center items-center fade-in">
       <div className="bg-white w-full max-w-7xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh]">

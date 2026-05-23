@@ -281,7 +281,7 @@ export default function RegistroPage() {
                       <option value="" disabled>Seleccionar</option>
                       {docTypesDB.map((doc: any) => (
                         <option key={doc.id || doc.id_documentType} value={doc.id || doc.id_documentType}>
-                          {doc.name || doc.nombre}
+                          {doc.description || doc.nombre}
                         </option>
                       ))}
                     </select>
@@ -300,9 +300,7 @@ export default function RegistroPage() {
                     <select name="genero" value={formData.genero} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
                       <option value="" disabled>Seleccionar</option>
                       {gendersDB.map((gen: any) => (
-                        <option key={gen.id || gen.id_gender} value={gen.id || gen.id_gender}>
-                          {gen.name || gen.nombre}
-                        </option>
+                        <option key={gen.id_gender} value={gen.id_gender}>{gen.description}</option>
                       ))}
                     </select>
                   </div>
@@ -381,7 +379,7 @@ export default function RegistroPage() {
                     <option value="" disabled>-- Seleccionar Rol --</option>
                     {rolesDB.map((rol: any) => {
                       const id = String(rol.id || rol.id_role);
-                      const name = rol.name || rol.nombre;
+                      const name = rol.description || rol.nombre;
                       const isBusiness = businessRoles.includes(name);
                       
                       // Deshabilitar si ya se eligió este rol, o si es un rol de negocio y ya hay otro rol de negocio elegido

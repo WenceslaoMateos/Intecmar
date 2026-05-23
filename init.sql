@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 create table Gender (
     id_gender INT AUTO_INCREMENT,
     `description`varchar(255) not null,
@@ -54,7 +56,7 @@ create table Institution (
     id_institution INT AUTO_INCREMENT,
     name varchar(255) not null,
     PRIMARY KEY (id_institution)
-);
+)DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Province (
     id_province VARCHAR(2) NOT NULL,
@@ -177,7 +179,7 @@ END $$
 
 CREATE PROCEDURE listRoles()
 BEGIN
-    SELECT `name`, `description` 
+    SELECT id_role, `name`, `description` 
     FROM `Role`
     WHERE public = TRUE;
 END $$

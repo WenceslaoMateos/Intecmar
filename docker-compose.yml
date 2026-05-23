@@ -3,6 +3,7 @@ services:
   # Servicio de Base de Datos
   db:
     image: mysql:8.4
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
       MYSQL_DATABASE: tesis_db

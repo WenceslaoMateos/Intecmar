@@ -18,6 +18,7 @@ import { FileStoringModule } from './fileStoring/fileStoring.module'; // <-- 1. 
       synchronize: true,      // ¡IMPORTANTE! Crea las tablas automáticamente (solo para dev)
       retryAttempts: 10,
       retryDelay: 3000, // Espera 3 segundos entre cada intento
+      charset: 'utf8mb4', // <-- AGREGA ESTO
     }),
     AuthModule,
     FileStoringModule // <-- 2. Agregarlo al arreglo de imports

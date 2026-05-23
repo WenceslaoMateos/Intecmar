@@ -113,14 +113,6 @@ export default function RegistroPage() {
       return;
     }
 
-    // 2. Validate File existence
-    if (!dniFile) {
-      setError('La imagen del DNI es obligatoria.');
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
       const submitData = new FormData();
 

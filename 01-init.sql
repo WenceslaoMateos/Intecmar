@@ -27,10 +27,18 @@ CREATE TABLE `User`
     gender int,
     cvFileName varchar(255),
     `address` varchar(255),
+    country int,
+    province varchar(2),
+    county varchar(5),
+    city varchar(11),
 
     PRIMARY KEY (id_user),
     FOREIGN KEY (documentType) REFERENCES DocumentType (id_DocumentType),
-    FOREIGN KEY (gender) REFERENCES Gender(id_gender)
+    FOREIGN KEY (gender) REFERENCES Gender(id_gender),
+    FOREIGN KEY (country) REFERENCES Country(id_country),
+    FOREIGN KEY (province) REFERENCES Province(id_province),
+    FOREIGN KEY (county) REFERENCES County(id_county),
+    FOREIGN KEY (city) REFERENCES City(id_city)
 );
 
 CREATE TABLE `Role`(
@@ -54,20 +62,20 @@ CREATE TABLE UsersXRol(
 
 create table Institution (
     id_institution INT AUTO_INCREMENT,
-    name varchar(255) not null,
+    `name` varchar(255) not null,
     PRIMARY KEY (id_institution)
-)DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 CREATE TABLE Province (
     id_province VARCHAR(2) NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
     PRIMARY KEY (id_province)
 );
 
 CREATE TABLE County (
     id_county VARCHAR(5) NOT NULL,
     id_province VARCHAR(2) NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
     PRIMARY KEY (id_county),
     FOREIGN KEY (id_province) REFERENCES Province(id_province)
 );
@@ -75,11 +83,17 @@ CREATE TABLE County (
 CREATE TABLE City (
     id_city VARCHAR(11) NOT NULL,
     id_county VARCHAR(5) NOT NULL,
-    name VARCHAR(100) NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
     PRIMARY KEY (id_city),
     FOREIGN KEY (id_county) REFERENCES County(id_county)
 );
--- hay que guardar las institcuiones en una tabla aparte
+
+CREATE TABLE Country (
+    id_country INT AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    phone_code VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id_country)
+);
 
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
@@ -168,11 +182,15 @@ CREATE PROCEDURE userCreate(
     IN p_numberDocument VARCHAR(50),
     IN p_gender INT,
     IN p_cvFileName VARCHAR(255),
-    IN p_address VARCHAR(255)
+    IN p_address VARCHAR(255),
+    IN p_country INT,
+    IN p_province VARCHAR(2),
+    IN p_county VARCHAR(5),
+    IN p_city VARCHAR(11)
 )
 BEGIN
-    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName, `address`)
-    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName, p_address);
+    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName, `address`, country, province, county, city)
+    VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName, p_address, p_country, p_province, p_county, p_city);
 
     SELECT LAST_INSERT_ID() AS id_user;
 END $$
@@ -207,5 +225,39 @@ BEGIN
     FROM Institution;
 END $$
 
+create procedure getCountries()
+BEGIN
+    SELECT id_country,
+        `name`,
+        phone_code
+    FROM Country;
+END $$
+
+create procedure getProvinces()
+BEGIN
+    SELECT id_province,
+        `name`
+    FROM Province;
+END $$
+
+create procedure getCountiesByProvince(
+    IN p_id_province VARCHAR(2)
+)
+BEGIN
+    SELECT id_county,
+        `name`
+    FROM County
+    WHERE id_province = p_id_province;
+END $$
+
+create procedure getCitiesByCounty(
+    IN p_id_county VARCHAR(5)
+)
+BEGIN
+    SELECT id_city,
+        `name`
+    FROM City
+    WHERE id_county = p_id_county;
+END $$
 
 DELIMITER ;

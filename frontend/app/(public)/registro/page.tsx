@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import Select from 'react-select';
 
 export default function RegistroPage() {
   // =========================================================================
@@ -41,24 +42,33 @@ export default function RegistroPage() {
   const [openSection, setOpenSection] = useState<number>(1);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [showRoleGuide, setShowRoleGuide] = useState(false);
+  
+  // Estado fundamental para evitar errores de hidratación
+  const [mounted, setMounted] = useState(false);
 
   // =========================================================================
   // 1.5 FETCH DE DATOS AL CARGAR LA PÁGINA
   // =========================================================================
   useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  useEffect(() => {
     const fetchCatalogos = async () => {
       try {
-        const [resRoles, resDocs, resGenders, resInst] = await Promise.all([
+        const [resRoles, resDocs, resGenders, resInst, resCountries] = await Promise.all([
           api.get('/roles').catch(() => ({ data: [] })), 
           api.get('/type_documents').catch(() => ({ data: [] })),
           api.get('/genders').catch(() => ({ data: [] })),
-          api.get('/institutions').catch(() => ({ data: [] }))
+          api.get('/institutions').catch(() => ({ data: [] })),
+          api.get('/countries').catch(() => ({ data: [] }))
         ]);
 
         setRolesDB(resRoles.data || []);
         setDocsDB(resDocs.data || []);
         setGendersDB(resGenders.data || []);
         setInstitutionsDB(resInst.data || []);
+        setCountriesDB(resCountries.data || []);
       } catch (err) {
         console.error("Error al cargar catálogos desde la BD", err);
       }
@@ -66,18 +76,34 @@ export default function RegistroPage() {
     fetchCatalogos();
   }, []);
   
-  // EFECTO EN CASCADA: Si cambia la Provincia, buscamos sus Partidos
+
+  // effect en cascada: Si cambia el País, buscamos sus Provincias
+  useEffect(() => {
+    if (formData.pais) {
+      // CORRECCIÓN: Llamamos a la ruta sin ID, ya que el servicio no lo necesita
+      api.get('/provinces')
+         .then(res => setProvincesDB(res.data || []))
+         .catch(err => console.error("Error cargando provincias", err));
+    } else {
+      setProvincesDB([]);
+    }
+    setFormData(prev => ({ ...prev, provincia: '', partido: '', localidad: '' }));
+    setCountiesDB([]);
+    setCitiesDB([]);
+  }, [formData.pais]); // CORRECCIÓN: Escuchar los cambios en formData.pais
+  
+  // effect en cascada: Si cambia la Provincia, buscamos sus Partidos
   useEffect(() => {
     if (formData.provincia) {
       api.get(`/counties/${formData.provincia}`)
          .then(res => setCountiesDB(res.data || []))
          .catch(err => console.error("Error cargando partidos", err));
     } else {
-      setCountiesDB([]); // Si borra la provincia, vaciamos la lista de partidos
+      setCountiesDB([]); 
     }
   }, [formData.provincia]);
 
-  // EFECTO EN CASCADA: Si cambia el Partido, buscamos sus Localidades
+  // effect en cascada: Si cambia el Partido, buscamos sus Localidades
   useEffect(() => {
     if (formData.partido) {
       api.get(`/cities/${formData.partido}`)
@@ -345,61 +371,70 @@ export default function RegistroPage() {
                   {/* País */}
                   <div className="lg:col-span-2">
                     <label className="block text-gray-700 text-xs font-bold mb-1">País *</label>
-                    <select name="pais" value={formData.pais} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
-                      <option value="" disabled>Seleccionar País...</option>
-                      {countriesDB.map((country: any) => (
-                        <option key={country.id || country.id_country} value={country.id || country.id_country}>
-                          {country.name || country.nombre}
-                        </option>
-                      ))}
-                    </select>
+                    {/* CORRECCIÓN: Verificamos mounted para solucionar hidratación */}
+                    {mounted && (
+                      <Select
+                        instanceId="select-pais"
+                        options={countriesDB.map(c => ({ value: c.id_country, label: c.name }))}
+                        onChange={(opt: any) => handleChange({ target: { name: 'pais', value: opt.value } } as any)}
+                        placeholder="Buscar país..."
+                        isSearchable
+                        className="text-sm"
+                      />
+                    )}
                   </div>
 
                   {/* Provincia */}
                   <div className="lg:col-span-2">
                     <label className="block text-gray-700 text-xs font-bold mb-1">Provincia *</label>
-                    <select name="provincia" value={formData.provincia} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white">
-                      <option value="" disabled>Seleccionar Provincia...</option>
-                      {provincesDB.map((prov: any) => (
-                        <option key={prov.id || prov.id_province} value={prov.id || prov.id_province}>
-                          {prov.name || prov.nombre}
-                        </option>
-                      ))}
-                    </select>
+                    {mounted && (
+                      <Select
+                        instanceId="select-provincia"
+                        options={provincesDB.map(p => ({ value: p.id_province, label: p.name }))}
+                        onChange={(opt: any) => handleChange({ target: { name: 'provincia', value: opt.value } } as any)}
+                        placeholder="Buscar provincia..."
+                        isSearchable
+                        className="text-sm"
+                      />
+                    )}
                   </div>
 
-                  {/* Partido (Bloqueado si no hay provincia) */}
+                  {/* Partido */}
                   <div className="lg:col-span-2">
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido  *</label>
-                    <select name="partido" value={formData.partido} onChange={handleChange} disabled={!formData.provincia} className="w-full px-3 py-2 text-sm border rounded bg-white disabled:bg-gray-100 disabled:text-gray-400">
-                      <option value="" disabled>{formData.provincia ? 'Seleccionar Partido...' : 'Primero seleccione Provincia'}</option>
-                      {countiesDB.map((county: any) => (
-                        <option key={county.id || county.id_county} value={county.id || county.id_county}>
-                          {county.name || county.nombre}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Partido / Departamento *</label>
+                    {mounted && (
+                      <Select
+                        instanceId="select-partido"
+                        options={countiesDB.map(c => ({ value: c.id_county, label: c.name }))}
+                        onChange={(opt: any) => handleChange({ target: { name: 'partido', value: opt.value } } as any)}
+                        isDisabled={!formData.provincia}
+                        placeholder={formData.provincia ? "Buscar partido..." : "Primero seleccione provincia..."}
+                        isSearchable
+                        className="text-sm"
+                      />
+                    )}
                   </div>
 
-                  {/* Localidad (Bloqueado si no hay partido) */}
+                  {/* Localidad */}
                   <div className="lg:col-span-2">
                     <label className="block text-gray-700 text-xs font-bold mb-1">Localidad / Ciudad *</label>
-                    <select name="localidad" value={formData.localidad} onChange={handleChange} disabled={!formData.partido} className="w-full px-3 py-2 text-sm border rounded bg-white disabled:bg-gray-100 disabled:text-gray-400">
-                      <option value="" disabled>{formData.partido ? 'Seleccionar Localidad...' : 'Primero seleccione Partido'}</option>
-                      {citiesDB.map((city: any) => (
-                        <option key={city.id || city.id_city} value={city.id || city.id_city}>
-                          {city.name || city.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Domicilio (Calle y Número) */}
-                  <div className="lg:col-span-4 mt-2">
-                    <label className="block text-gray-700 text-xs font-bold mb-1">Domicilio (Calle / Número) *</label>
-                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" placeholder="Ej: Av. Luro 3000" />
+                    {mounted && (
+                      <Select
+                        instanceId="select-localidad"
+                        options={citiesDB.map(c => ({ value: c.id_city, label: c.name }))}
+                        onChange={(opt: any) => handleChange({ target: { name: 'localidad', value: opt.value } } as any)}
+                        isDisabled={!formData.partido}
+                        placeholder={formData.partido ? "Buscar localidad..." : "Primero seleccione partido..."}
+                        isSearchable
+                        className="text-sm"
+                      />
+                    )}
                   </div>
                   
+                  <div className="lg:col-span-4 mt-2">
+                    <label className="block text-gray-700 text-xs font-bold mb-1">Domicilio *</label>
+                    <input type="text" name="domicilio" value={formData.domicilio} onChange={handleChange} className="w-full px-3 py-2 text-sm border rounded bg-white" placeholder="Ej: Av. Colón 1234" />
+                  </div>
                 </div>
               </div>
             </section>

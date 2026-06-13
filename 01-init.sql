@@ -1,5 +1,57 @@
 SET NAMES utf8mb4;
 
+create table proyectCategories (
+    id_proyectCategory INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    `description` varchar(255) not null,
+    PRIMARY KEY (id_proyectCategory)
+);
+
+create table enterpriseTypes (
+    id_enterpriseType INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    `description` varchar(255),
+    PRIMARY KEY (id_enterpriseType)
+);
+
+create table legalRepresentative (
+    id_legalRepresentative INT AUTO_INCREMENT,
+    firstName varchar(100) not null,
+    lastName varchar(100) not null,
+    birthDate date,
+    dni varchar(11),
+    phoneNumber int, 
+    numberDocument varchar(50),
+    uidDNIFile varchar(50),
+    PRIMARY KEY (id_legalRepresentative)
+);
+
+create table proyect (
+    id_proyect INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    fantasyName varchar(255),
+    email varchar(255),
+    webpage varchar(255),
+    instagram varchar(255),
+    linkedin varchar(255),
+    twitter varchar(255),
+    `description` text,
+    solution text,
+    `value` text,
+    isProduct boolean,
+    description_isProduct text,
+    resources text,
+    birthDate date,
+    formalizationDate date,
+    CUIT varchar(11),
+    ARCAFileName varchar(255),
+    id_proyectCategory int,
+    id_enterpriseType int,
+    PRIMARY KEY (id_proyect),
+    FOREIGN KEY (id_proyectCategory) REFERENCES proyectCategories(id_proyectCategory),
+    FOREIGN KEY (id_enterpriseType) REFERENCES enterpriseTypes(id_enterpriseType)
+);
+
 create table Gender (
     id_gender INT AUTO_INCREMENT,
     `description`varchar(255) not null,
@@ -100,11 +152,26 @@ create table Institution (
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
 
+insert into proyectCategories(`name`, `description`)
+values
+('Idea', 'Proyecto en etapa conceptual, sin validación con usuarios ni desarrollo funcional. Se está definiendo la propuesta de valor y el problema a resolver.'),
+('Validación de prototipo', 'Cuenta con un prototipo o MVP desarrollado y en prueba con usuarios reales para validar hipótesis clave (problema, solución, mercado).'),
+('Crecimiento temprano', 'Producto validado con clientes y primeras ventas. Enfocado en mejorar el modelo de negocio y/o escalar la adquisición de usuarios.'),
+('Escala/Madurez', 'Modelo de negocio con operaciones estables y foco en expansión sostenida (mercados, equipo, ingresos).');
+
+insert into enterpriseTypes(`name`)
+values
+('SA'),
+('SRL'),
+('SAS'),
+('Cooperativa'),
+('UP'),
+('Otra');
+
 insert into `User`(email, `password`)
 values 
-('wenceslaomateos@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
-('paulabonifazi@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O'),
-('nahuel@gmail.com','$2b$10$hL.uf3jagIPG8plLjruAXOZ6k0lDxKrdOUaJKgL3aDTTWC0/pF65O');
+('wenceslaomateos@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),--1234
+('paulabonifazi@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm');
 
 INSERT INTO `Role`(`name`, public, `description`)
 VALUES 

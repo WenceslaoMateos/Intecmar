@@ -9,20 +9,20 @@ export class AppController {
     private readonly appService: AppService
   ) {}
 
-  @Post('register')
-  @UseInterceptors(FileInterceptor('cvFile')) // The string here must match your frontend FormData key
+@Post('register')
+  @UseInterceptors(FileInterceptor('cvFile'))
   register(
     @Body() body: Record<string, string>,
     @UploadedFile(
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
-          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10 MB limit
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|pdf)' }), // Accepted formats
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|pdf)' }),
         ],
       }),
-    ) file: Express.Multer.File
+    ) file?: Express.Multer.File
   ) {
-    // We now pass both the text body and the file to your service
     return this.appService.register(body, file);
   }
   

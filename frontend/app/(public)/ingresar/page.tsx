@@ -26,10 +26,8 @@ export default function IngresarPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          user: {
             email, 
             password
-          }
         }),
       });
 

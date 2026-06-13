@@ -6,7 +6,7 @@ import Select from 'react-select';
 
 export default function RegistroPage() {
   // =========================================================================
-  // 0. ESTADOS PARA LOS CATÁLOGOS DINÁMICOS (BD)
+  // 1. ESTADOS PARA LOS CATÁLOGOS DINÁMICOS (BD)
   // =========================================================================
   const [rolesDB, setRolesDB] = useState<any[]>([]);
   const [docTypesDB, setDocsDB] = useState<any[]>([]);
@@ -18,7 +18,7 @@ export default function RegistroPage() {
   const [citiesDB, setCitiesDB] = useState<any[]>([]);
 
   // =========================================================================
-  // 1. ESTADO UNIFICADO DEL FORMULARIO
+  // 2. ESTADO UNIFICADO DEL FORMULARIO
   // =========================================================================
   const [formData, setFormData] = useState({
     nombre: '', apellido: '', fechaNacimiento: '', 
@@ -42,12 +42,10 @@ export default function RegistroPage() {
   const [openSection, setOpenSection] = useState<number>(1);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [showRoleGuide, setShowRoleGuide] = useState(false);
-  
-  // Estado fundamental para evitar errores de hidratación
   const [mounted, setMounted] = useState(false);
 
   // =========================================================================
-  // 1.5 FETCH DE DATOS AL CARGAR LA PÁGINA
+  // 3.FETCH DE DATOS AL CARGAR LA PÁGINA
   // =========================================================================
   useEffect(() => {
     setMounted(true);
@@ -80,7 +78,6 @@ export default function RegistroPage() {
   // effect en cascada: Si cambia el País, buscamos sus Provincias
   useEffect(() => {
     if (formData.pais) {
-      // CORRECCIÓN: Llamamos a la ruta sin ID, ya que el servicio no lo necesita
       api.get('/provinces')
          .then(res => setProvincesDB(res.data || []))
          .catch(err => console.error("Error cargando provincias", err));
@@ -90,7 +87,7 @@ export default function RegistroPage() {
     setFormData(prev => ({ ...prev, provincia: '', partido: '', localidad: '' }));
     setCountiesDB([]);
     setCitiesDB([]);
-  }, [formData.pais]); // CORRECCIÓN: Escuchar los cambios en formData.pais
+  }, [formData.pais]); 
   
   // effect en cascada: Si cambia la Provincia, buscamos sus Partidos
   useEffect(() => {
@@ -115,7 +112,7 @@ export default function RegistroPage() {
   }, [formData.partido]);
 
   // =========================================================================
-  // 2. LÓGICA CONDICIONAL DE ROLES
+  // 4. LÓGICA CONDICIONAL DE ROLES
   // =========================================================================
   const hasBusinessRole = formData.roles.some(roleName => roleName.includes('Emprendedor') || roleName.includes('Empresario'));
   const isReferente = formData.roles.some(roleName => roleName.includes('Referente Institucional'));
@@ -135,7 +132,7 @@ export default function RegistroPage() {
   ];
 
   // =========================================================================
-  // 3. MANEJADORES DE EVENTOS
+  // 5. MANEJADORES DE EVENTOS
   // =========================================================================
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -229,7 +226,7 @@ export default function RegistroPage() {
         submitData.append('cvFile', cvFile);
       }
 
-      const response = await api.post('/auth/register', submitData);
+      const response = await api.post('/register', submitData);
       const data = response.data;
 
       const token = data.access_token || data.token;

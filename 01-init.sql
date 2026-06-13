@@ -1,66 +1,47 @@
 SET NAMES utf8mb4;
 
-create table proyectCategories (
+CREATE TABLE proyectCategories (
     id_proyectCategory INT AUTO_INCREMENT,
     `name` varchar(255) not null,
     `description` varchar(255) not null,
     PRIMARY KEY (id_proyectCategory)
 );
 
-create table enterpriseTypes (
+CREATE TABLE enterpriseTypes (
     id_enterpriseType INT AUTO_INCREMENT,
     `name` varchar(255) not null,
     `description` varchar(255),
     PRIMARY KEY (id_enterpriseType)
 );
 
-create table legalRepresentative (
+CREATE TABLE legalRepresentative (
     id_legalRepresentative INT AUTO_INCREMENT,
     firstName varchar(100) not null,
     lastName varchar(100) not null,
     birthDate date,
     dni varchar(11),
     phoneNumber int, 
-    numberDocument varchar(50),
-    uidDNIFile varchar(50),
+    email varchar(255),
+    endorsment varchar(255),
     PRIMARY KEY (id_legalRepresentative)
 );
 
-create table proyect (
-    id_proyect INT AUTO_INCREMENT,
+create table innovationAreas (
+    id_innovationArea INT AUTO_INCREMENT,
     `name` varchar(255) not null,
-    fantasyName varchar(255),
-    email varchar(255),
-    webpage varchar(255),
-    instagram varchar(255),
-    linkedin varchar(255),
-    twitter varchar(255),
     `description` text,
-    solution text,
-    `value` text,
-    isProduct boolean,
-    description_isProduct text,
-    resources text,
-    birthDate date,
-    formalizationDate date,
-    CUIT varchar(11),
-    ARCAFileName varchar(255),
-    id_proyectCategory int,
-    id_enterpriseType int,
-    PRIMARY KEY (id_proyect),
-    FOREIGN KEY (id_proyectCategory) REFERENCES proyectCategories(id_proyectCategory),
-    FOREIGN KEY (id_enterpriseType) REFERENCES enterpriseTypes(id_enterpriseType)
+    PRIMARY KEY (id_innovationArea)
 );
 
-create table Gender (
+CREATE TABLE Gender (
     id_gender INT AUTO_INCREMENT,
-    `description`varchar(255) not null,
+    `description` varchar(255) not null,
     PRIMARY KEY (id_gender)
 );
 
-create table DocumentType (
+CREATE TABLE documentType (
     id_DocumentType INT AUTO_INCREMENT,
-    `description`varchar(255) not null,
+    `description` varchar(255) not null,
     PRIMARY KEY (id_DocumentType)
 );
 
@@ -114,7 +95,7 @@ CREATE TABLE `User`
     city varchar(11),
 
     PRIMARY KEY (id_user),
-    FOREIGN KEY (documentType) REFERENCES DocumentType (id_DocumentType),
+    FOREIGN KEY (documentType) REFERENCES documentType (id_DocumentType),
     FOREIGN KEY (gender) REFERENCES Gender(id_gender),
     FOREIGN KEY (country) REFERENCES Country(id_country),
     FOREIGN KEY (province) REFERENCES Province(id_province),
@@ -126,7 +107,7 @@ CREATE TABLE `Role`(
     id_role INT AUTO_INCREMENT,
     `name` varchar(100),
     `description` text default null,
-    public boolean default TRUE,
+    `public` boolean default true,
 
     PRIMARY KEY (id_role)
 );
@@ -141,16 +122,84 @@ CREATE TABLE UsersXRol(
     FOREIGN KEY(id_role) REFERENCES `Role`(id_role)
 );
 
-create table Institution (
+CREATE TABLE Institution (
     id_institution INT AUTO_INCREMENT,
     `name` varchar(255) not null,
     PRIMARY KEY (id_institution)
 );
 
 
+CREATE TABLE proyect (
+    id_proyect INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    fantasyName varchar(255),
+    email varchar(255),
+    webpage varchar(255),
+    instagram varchar(255),
+    linkedin varchar(255),
+    twitter varchar(255),
+    `description` text,
+    solution text,
+    `value` text,
+    isProduct boolean,
+    description_isProduct text,
+    resources text,
+    birthDate date,
+    formalizationDate date,
+    CUIT varchar(11),
+    ARCAFileName varchar(255),
+    id_proyectCategory int,
+    id_enterpriseType int,
+    motivation text,
+    address varchar(255),
+    country int,
+    province varchar(2),
+    county varchar(5),
+    city varchar(11),
+    PRIMARY KEY (id_proyect),
+    FOREIGN KEY (id_proyectCategory) REFERENCES proyectCategories(id_proyectCategory),
+    FOREIGN KEY (id_enterpriseType) REFERENCES enterpriseTypes(id_enterpriseType),
+    FOREIGN KEY (country) REFERENCES Country(id_country),
+    FOREIGN KEY (province) REFERENCES Province(id_province),
+    FOREIGN KEY (county) REFERENCES County(id_county),
+    FOREIGN KEY (city) REFERENCES City(id_city)
+);
+
+create table proyectMember(
+    id_proyectMember INT AUTO_INCREMENT,
+    id_proyect INT,
+    id_user INT,
+    PRIMARY KEY (id_proyectMember),
+    FOREIGN KEY (id_proyect) REFERENCES proyect(id_proyect),
+    FOREIGN KEY (id_user) REFERENCES `User`(id_user)
+);
+
+
+create table proyectXInnovationArea (
+    id_proyectXinnovationArea INT AUTO_INCREMENT,
+    id_proyect INT,
+    id_innovationArea INT,
+    PRIMARY KEY (id_proyectXinnovationArea),
+    FOREIGN KEY (id_proyect) REFERENCES proyect(id_proyect),
+    FOREIGN KEY (id_innovationArea) REFERENCES innovationAreas(id_innovationArea)
+);
 
 /************************************************************************************************************************************************************/
 /************************************************************************************************************************************************************/
+
+insert into innovationAreas(`name`)
+values 
+('Producto'),
+('Servicio'),
+('Proceso'),
+('Modelo de Negocios'),
+('Nuevos productos o servicios (combinado)'),
+('Administración – gestión'),
+('Desarrollo de proveedores'),
+('Producción'),
+('I+D'),
+('Comercialización'),
+('Otra');
 
 insert into proyectCategories(`name`, `description`)
 values
@@ -170,27 +219,27 @@ values
 
 insert into `User`(email, `password`)
 values 
-('wenceslaomateos@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),--1234
+('wenceslaomateos@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),/*1234*/
 ('paulabonifazi@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm');
 
 INSERT INTO `Role`(`name`, public, `description`)
 VALUES 
-('Administrador', FALSE, 'Usuario con permisos de administración'),
-('Emprendedor/a Incipiente', TRUE, 'Tengo una idea o proyecto emprendedor y estoy organizando las actividades para ponerlo en marcha y crear la empresa'),
-('Emprendedor/a con empresa en marcha', TRUE, 'Tengo una nueva empresa (menos de 3 años) y quiero crecer (corresponde a la etapa Desarrollo inicial del perfil Empresas)'),
-('Empresario/a joven', TRUE, 'Tengo una empresa joven (de 3 a 15 años de antigüedad) rentable y quiero hacerla crecer'),
-('Empresario/a maduro', TRUE, 'Tengo una empresa madura (más de 15 años de antigüedad)'),
-('Docente o Facilitador/a', TRUE, 'Forma y guía procesos de aprendizaje vinculados al emprendimiento.'),
-('Investigador/a', TRUE, 'Genera conocimiento y desarrolla soluciones aplicadas a la innovación.'),
-('Consultor/a', TRUE, 'Brinda asesoramiento especializado para mejorar proyectos o empresas.'),
-('Mentor/a', TRUE, 'Acompaña a emprendedores aportando experiencia, visión y red de contactos.'),
-('Tutor/a', TRUE, 'Realiza seguimiento cercano del proceso de desarrollo de proyectos.'),
-('Estudiante', TRUE, 'Se encuentra en formación y explora el emprendimiento como oportunidad.'),
-('Inversor/a', TRUE, 'Aporta capital a proyectos con potencial de crecimiento.'),
-('Jurado', TRUE, 'Evalúa proyectos según criterios definidos en convocatorias o programas.'),
-('Referente Institucional', TRUE, 'Representa y articula desde una organización dentro del ecosistema.'),
-('Evaluador/a', TRUE, 'Participa en la evaluación de proyectos, programas o convocatorias.'),
-('Otro', TRUE, 'Rol diverso dentro del ecosistema emprendedor que no encaja en las categorías anteriores.');
+('Administrador', false, 'Usuario con permisos de administración'),
+('Emprendedor/a Incipiente', true, 'Tengo una idea o proyecto emprendedor y estoy organizando las actividades para ponerlo en marcha y crear la empresa'),
+('Emprendedor/a con empresa en marcha', true, 'Tengo una nueva empresa (menos de 3 años) y quiero crecer (corresponde a la etapa Desarrollo inicial del perfil Empresas)'),
+('Empresario/a joven', true, 'Tengo una empresa joven (de 3 a 15 años de antigüedad) rentable y quiero hacerla crecer'),
+('Empresario/a maduro', true, 'Tengo una empresa madura (más de 15 años de antigüedad)'),
+('Docente o Facilitador/a', true, 'Forma y guía procesos de aprendizaje vinculados al emprendimiento.'),
+('Investigador/a', true, 'Genera conocimiento y desarrolla soluciones aplicadas a la innovación.'),
+('Consultor/a', true, 'Brinda asesoramiento especializado para mejorar proyectos o empresas.'),
+('Mentor/a', true, 'Acompaña a emprendedores aportando experiencia, visión y red de contactos.'),
+('Tutor/a', true, 'Realiza seguimiento cercano del proceso de desarrollo de proyectos.'),
+('Estudiante', true, 'Se encuentra en formación y explora el emprendimiento como oportunidad.'),
+('Inversor/a', true, 'Aporta capital a proyectos con potencial de crecimiento.'),
+('Jurado', true, 'Evalúa proyectos según criterios definidos en convocatorias o programas.'),
+('Referente Institucional', true, 'Representa y articula desde una organización dentro del ecosistema.'),
+('Evaluador/a', true, 'Participa en la evaluación de proyectos, programas o convocatorias.'),
+('Otro', true, 'Rol diverso dentro del ecosistema emprendedor que no encaja en las categorías anteriores.');
 
 insert into Gender(description)
 values
@@ -198,7 +247,7 @@ values
 ('Masculino'),
 ('Otro');
 
-insert into DocumentType(description)
+insert into documentType(description)
 values
 ('DNI'),
 ('Pasaporte'),
@@ -235,6 +284,7 @@ CREATE PROCEDURE userExists(
     IN p_email VARCHAR(255)
 )
 BEGIN
+
     SELECT u.email, u.password
     FROM `User` u 
     WHERE u.email = p_email;
@@ -258,7 +308,7 @@ CREATE PROCEDURE userCreate(
     IN p_city VARCHAR(11)
 )
 BEGIN
-    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, DocumentType, numberDocument, gender, cvFileName, `address`, country, province, county, city)
+    INSERT INTO `User` (email, `password`, firstName, lastName, birthDate, cuilCuit, documentType, numberDocument, gender, cvFileName, `address`, country, province, county, city)
     VALUES (p_email, p_password, p_firstName, p_lastName, p_birthDate, p_cuilCuit, p_DocumentType, p_numberDocument, p_gender, p_cvFileName, p_address, p_country, p_province, p_county, p_city);
 
     SELECT LAST_INSERT_ID() AS id_user;
@@ -268,7 +318,7 @@ CREATE PROCEDURE listRoles()
 BEGIN
     SELECT id_role, `name`, `description` 
     FROM `Role`
-    WHERE public = TRUE;
+    WHERE public = true;
 END $$
 
 CREATE PROCEDURE getDocumentTypes ()
@@ -276,7 +326,7 @@ BEGIN
 	SELECT 
         id_DocumentType,
 		description
-	FROM DocumentType;
+	FROM documentType;
 END $$
 
 CREATE PROCEDURE getGenders ()
@@ -287,14 +337,14 @@ BEGIN
 	FROM Gender;
 END $$
 
-create procedure getInstitutions()
+CREATE procedure getInstitutions()
 BEGIN
     SELECT id_institution,
         name
     FROM Institution;
 END $$
 
-create procedure getCountries()
+CREATE procedure getCountries()
 BEGIN
     SELECT id_country,
         `name`,
@@ -302,14 +352,14 @@ BEGIN
     FROM Country;
 END $$
 
-create procedure getProvinces()
+CREATE procedure getProvinces()
 BEGIN
     SELECT id_province,
         `name`
     FROM Province;
 END $$
 
-create procedure getCountiesByProvince(
+CREATE procedure getCountiesByProvince(
     IN p_id_province VARCHAR(2)
 )
 BEGIN
@@ -319,7 +369,7 @@ BEGIN
     WHERE id_province = p_id_province;
 END $$
 
-create procedure getCitiesByCounty(
+CREATE procedure getCitiesByCounty(
     IN p_id_county VARCHAR(5)
 )
 BEGIN

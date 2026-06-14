@@ -55,7 +55,6 @@ export default function EditarPerfilPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Cargar catálogos
         const [resRoles, resDocs, resGenders, resInst, resCountries] = await Promise.all([
           api.get('/roles').catch(() => ({ data: [] })), 
           api.get('/type_documents').catch(() => ({ data: [] })),
@@ -70,7 +69,7 @@ export default function EditarPerfilPage() {
         setInstitutionsDB(resInst.data || []);
         setCountriesDB(resCountries.data || []);
 
-        // 2. Cargar datos del usuario logueado
+        // Cargar datos del usuario logueado
         // NOTA: Ajustá la ruta '/users/me' según cómo esté configurado tu Nest.js
         const userRes = await api.get('/users/me').catch(() => ({ data: null }));
         
@@ -294,47 +293,42 @@ export default function EditarPerfilPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 fade-in py-8 px-4">
+    <div className="min-h-screen bg-gray-50 flex">
       
-      {/* HEADER DE LA PÁGINA */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 font-heading">Editar Perfil</h1>
-          <p className="text-gray-500 text-sm mt-1">Mantené tu información actualizada para mejorar tus vinculaciones.</p>
+      {/* ================= PANEL IZQUIERDO (Navegación) ================= */}
+      <div className="w-1/4 bg-brand-dark p-10 text-white flex flex-col relative hidden md:flex shrink-0">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        
+        <div className="relative z-10 mb-8 shrink-0">
+          <Link href="/perfil" className="text-gray-300 hover:text-white transition flex items-center gap-2 text-xs font-bold mb-6 opacity-80 hover:opacity-100">
+            <i className="fas fa-arrow-left"></i> Volver al perfil
+          </Link>
+          <h3 className="text-2xl font-bold mb-3 font-heading">Editar<br/>Perfil</h3>
         </div>
-        <Link href="/perfil" className="text-gray-400 hover:text-brand-magenta transition flex items-center gap-2 text-sm font-bold border border-gray-200 px-4 py-2 rounded-lg">
-          <i className="fas fa-times"></i> Cancelar
-        </Link>
+
+        <hr className="border-gray-700 relative z-10 mb-8 opacity-50" />
+
+        <div className="relative z-10 flex-grow overflow-y-auto [&::-webkit-scrollbar]:hidden">
+          <ul className="space-y-4 text-xs font-medium">
+            {menuItems.map((item) => (
+              <li 
+                key={item.id} 
+                className={`flex items-center cursor-pointer transition-all duration-200 ${openSection === item.id ? 'text-brand-teal font-bold' : 'text-gray-400 hover:text-gray-200'}`}
+                onClick={() => toggleSection(item.id)}
+              >
+                <i className={`fas fa-dot-circle mr-3 ${openSection === item.id ? 'text-brand-teal' : 'text-gray-600'}`}></i> 
+                {item.title}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* SIDEBAR: MENÚ DE SECCIONES */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 sticky top-24">
-            <h3 className="font-bold text-gray-800 text-sm mb-6 uppercase tracking-wider">Secciones</h3>
-            <ul className="space-y-4 text-sm font-medium">
-              {menuItems.map((item) => (
-                <li 
-                  key={item.id} 
-                  className={`flex items-center cursor-pointer transition-all duration-200 ${openSection === item.id ? 'text-brand-teal font-bold' : 'text-gray-500 hover:text-gray-800'}`}
-                  onClick={() => toggleSection(item.id)}
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 border ${openSection === item.id ? 'border-brand-teal bg-teal-50 text-brand-teal' : 'border-gray-200 text-gray-400'}`}>
-                    {item.id}
-                  </div>
-                  {item.title}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* CONTENEDOR DEL FORMULARIO */}
-        <div className="lg:col-span-3">
-            {error && <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded mb-6 text-sm"><i className="fas fa-exclamation-circle mr-2"></i> {error}</div>}
-            {success && <div className="bg-green-50 border-l-4 border-brand-success text-green-700 p-3 rounded mb-6 text-sm"><i className="fas fa-check-circle mr-2"></i> ¡Cambios guardados con éxito!</div>}
-
+      {/* ================= FORMULARIO DERECHO (Contenido) ================= */}
+      <div className="flex-grow p-12 overflow-y-auto">
+        <div className="max-w-4xl">
+          <h2 className="text-2xl font-bold text-gray-800 mb-8 font-heading">Completá tus datos personales</h2>
+          
           <form onSubmit={handleSave} className="space-y-4">
             
             {/* --- SECCIÓN 1: INFORMACIÓN BÁSICA --- */}

@@ -28,7 +28,7 @@ export default function PerfilPage() {
   ]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in">
       
       {/* ========================================== */}
       {/* COLUMNA IZQUIERDA (Perfil y Proyectos) */}
@@ -67,12 +67,14 @@ export default function PerfilPage() {
                   <i className="fas fa-map-marker-alt mr-2 text-gray-300"></i> Mar del Plata, Argentina
                 </p>
               </div>
-              <button 
-                onClick={() => alert('Abrir modal para editar perfil')}
+              
+              {/* ACÁ ESTÁ EL CAMBIO: Reemplazamos el button por Link */}
+              <Link 
+                href="/perfil/editar"
                 className="text-brand-teal border border-brand-teal px-5 py-1.5 rounded-full font-bold hover:bg-brand-teal hover:text-white transition text-sm flex items-center shadow-sm shrink-0"
               >
                 <i className="fas fa-pen mr-2"></i> Editar
-              </button>
+              </Link>
             </div>
 
             <div className="mt-6 pt-5 border-t border-gray-100">
@@ -90,16 +92,16 @@ export default function PerfilPage() {
             <h2 className="text-xl font-bold text-gray-800 font-heading flex items-center gap-2">
               <i className="fas fa-rocket text-brand-teal"></i> Mis Proyectos
             </h2>
-            <button 
-              onClick={() => alert('Fase 2: Abrirá el formulario para cargar un nuevo proyecto.')} 
+            <Link 
+              href="/perfil/proyectos/nuevo" 
               className="flex items-center gap-2 text-white bg-brand-magenta hover:bg-purple-800 px-5 py-2 rounded-full text-sm font-bold transition shadow-sm"
             >
               <i className="fas fa-plus"></i> Nuevo Proyecto
-            </button>
+            </Link>
           </div>
 
           <div className="relative pl-4">
-            {/* Línea vertical del timeline (La clase está en tu globals.css) */}
+            {/* Línea vertical del timeline */}
             <div className="timeline-line"></div>
 
             <div className="space-y-8">
@@ -125,7 +127,7 @@ export default function PerfilPage() {
                       {proj.desc}
                     </p>
                     
-                    {/* Botones de acción del proyecto (Aparecen en desktop al hacer hover, o siempre visibles en móvil) */}
+                    {/* Botones de acción del proyecto */}
                     <div className="mt-4 flex gap-3 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button className="text-xs text-white bg-brand-dark px-3 py-1.5 rounded hover:bg-gray-800 font-bold shadow-sm transition">
                         Ver detalles
@@ -149,7 +151,6 @@ export default function PerfilPage() {
       {/* ========================================== */}
       <div className="space-y-6">
         
-
         {/* Sugerencias para ti (Sticky para que baje con el scroll) */}
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-200 sticky top-24">
           <h3 className="font-bold text-gray-800 text-sm mb-4 font-heading border-b border-gray-100 pb-2">Sugerencias para ti</h3>

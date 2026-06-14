@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation'; // <-- 1. Agregamos useRouter
+import { usePathname, useRouter } from 'next/navigation'; 
+import Image from 'next/image'; 
 
 export const UserNavbar = () => {
   const pathname = usePathname();
-  const router = useRouter(); // <-- 2. Inicializamos el router
+  const router = useRouter(); 
 
   // Función para determinar si el link está activo (para pintar el ícono y texto)
   const isActive = (path: string) => {
@@ -13,7 +14,7 @@ export const UserNavbar = () => {
     return pathname === path;
   };
 
-  // 3. Función REAL para cerrar sesión
+  // Función REAL para cerrar sesión
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault(); // Evitamos que el navegador intente ir a otra página
     
@@ -27,17 +28,25 @@ export const UserNavbar = () => {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex justify-between items-center h-16">
+        {/* ACÁ ESTÁ EL CAMBIO: Cambiamos h-16 por h-24 y agregamos py-2 para darle más altura y respiro al logo */}
+        <div className="flex justify-between items-center h-24 py-2">
           
           {/* Lado Izquierdo: Logo & Buscador */}
-          <div className="flex items-center gap-4">
-            {/* Logo (Lleva a Inicio) */}
-            <Link href="/" className="w-8 h-8 bg-gradient-to-br from-brand-teal to-brand-magenta rounded flex items-center justify-center text-white font-bold cursor-pointer hover:opacity-90 transition">
-              <i className="fa-solid fa-water text-xs"></i>
+          <div className="flex items-center gap-4 h-full">
+            {/* Logo */}
+            <Link href="/" className="flex items-center cursor-pointer h-full">
+              <Image 
+                src="/red-intecmar.png" 
+                alt="Logo de Red Intecmar"
+                width={180} 
+                height={64} // También le di un poquito más de altura permitida a la imagen
+                priority 
+                className="object-contain min-w-[111px] h-full" // h-full asegura que use el espacio disponible
+              />
             </Link>
             
             {/* Buscador (Se oculta en celulares) */}
-            <div className="relative hidden md:block">
+            <div className="relative hidden md:block ml-4">
               <i className="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
               <input 
                 type="text" 

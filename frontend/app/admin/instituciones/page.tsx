@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function InstitucionesPage() {
+  const router = useRouter();
   
   // Estado con datos de prueba genéricos pero MÁS COMPLETOS para el modal
   const [institutions, setInstitutions] = useState([
@@ -63,17 +66,8 @@ export default function InstitucionesPage() {
     },
   ]);
 
-  // NUEVO: Estado para controlar qué institución se muestra en el modal (null = cerrado)
+  // Estado para controlar qué institución se muestra en el modal (null = cerrado)
   const [selectedInstitution, setSelectedInstitution] = useState<any | null>(null);
-
-  // Funciones simuladas
-  const handleCreate = () => {
-    alert('En la Fase 2, esto abrirá un formulario modal para cargar el logo, nombre y descripción de la nueva institución.');
-  };
-
-  const handleEdit = (name: string) => {
-    alert(`Abriendo el editor para: ${name}`);
-  };
 
   const handleDelete = (name: string, id: number) => {
     if (confirm(`¿Estás completamente seguro de que deseas eliminar a "${name}" de la red? Esta acción no se puede deshacer.`)) {
@@ -91,14 +85,15 @@ export default function InstitucionesPage() {
       {/* Cabecera y botón de acción */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <p className="text-gray-600 max-w-2xl">
-          Administra las entidades que forman parte del ecosistema. Recuerda que solo el Administrador puede crear o eliminar instituciones públicas.
+          Administra las entidades que forman parte del ecosistema.
         </p>
-        <button 
-          onClick={handleCreate}
-          className="bg-brand-teal text-white px-5 py-2.5 rounded-lg hover:bg-brand-dark transition shadow-md flex items-center gap-2 font-bold text-sm shrink-0"
-        >
-          <i className="fas fa-plus"></i> Nueva Institución
-        </button>
+       
+        <Link 
+            href="/admin/instituciones/nueva"
+            className="bg-brand-teal text-white px-5 py-2.5 rounded-lg hover:bg-brand-dark transition shadow-md flex items-center gap-2 font-bold text-sm shrink-0"
+          >
+            <i className="fas fa-plus"></i> Nueva Institución
+        </Link>
       </div>
       
       {/* Grilla de Instituciones */}
@@ -131,32 +126,32 @@ export default function InstitucionesPage() {
           ))}
         </div>
       ) : (
-        /* ESTADO VACÍO: Si eliminas todas las instituciones */
+        /* ESTADO VACÍO: Si se eliminan todas las instituciones */
         <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
           <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 text-3xl">
             <i className="fas fa-building-circle-xmark"></i>
           </div>
           <h3 className="text-xl font-bold text-gray-800 mb-2 font-heading">No hay instituciones</h3>
           <p className="text-gray-500 mb-6 max-w-md mx-auto">Actualmente no hay ninguna institución registrada en la red. Haz clic en el botón superior para agregar la primera.</p>
-          <button 
-            onClick={handleCreate}
-            className="text-brand-teal font-bold hover:underline"
+          <Link 
+            href="/admin/instituciones/nueva"
+            className="text-brand-teal font-bold hover:underline inline-block"
           >
             Crear nueva institución ahora
-          </button>
+          </Link>
         </div>
       )}
 
-      {/* NUEVO: VENTANA MODAL DE DETALLES */}
+      {/* VENTANA MODAL DE DETALLES */}
       {selectedInstitution && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in"
-          onClick={() => setSelectedInstitution(null)} // Cierra al hacer clic afuera
+          onClick={() => setSelectedInstitution(null)} 
         >
           {/* Contenedor principal del modal */}
           <div 
             className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative transform transition-all flex flex-col max-h-[90vh]" 
-            onClick={(e) => e.stopPropagation()} // Evita que el clic adentro cierre el modal
+            onClick={(e) => e.stopPropagation()} 
           >
             {/* Botón X superior */}
             <button 
@@ -254,10 +249,12 @@ export default function InstitucionesPage() {
               >
                 <i className="fas fa-trash mr-2"></i> Eliminar Institución
               </button>
+              
+              {/* Editar Institución */}
               <button 
                 onClick={() => {
-                  handleEdit(selectedInstitution.name);
                   setSelectedInstitution(null);
+                  router.push(`/admin/instituciones/editar/${selectedInstitution.id}`);
                 }}
                 className="px-6 py-2.5 bg-brand-teal text-white text-sm font-bold rounded-lg hover:bg-brand-dark transition shadow-md flex items-center justify-center"
               >

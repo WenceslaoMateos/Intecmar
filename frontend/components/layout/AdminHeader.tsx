@@ -12,6 +12,7 @@ export const AdminHeader = () => {
     if (pathname.includes('/solicitudes')) return 'Gestión de Solicitudes';
     if (pathname.includes('/instituciones')) return 'Gestión de Instituciones';
     if (pathname.includes('/usuarios')) return 'Base de Usuarios';
+    if (pathname.includes('/programas')) return 'Gestión de Programas';
     if (pathname.includes('/actividades')) return 'Gestión de Actividades';
     if (pathname.includes('/proyectos')) return 'Supervisión de Proyectos';
     

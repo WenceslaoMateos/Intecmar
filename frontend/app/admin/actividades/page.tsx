@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function ActividadesPage() {
+  const router = useRouter();
   
-  // 1. Datos simulados de las actividades (ahora con setActivities para poder modificarlas)
+  // 1. Datos simulados de las actividades
   const [activities, setActivities] = useState([
     {
       id: 1,
@@ -60,15 +63,9 @@ export default function ActividadesPage() {
     }
   ]);
 
-  // 2. Estados para los filtros y modales
+  // 2. Estados para los filtros y el modal de detalles
   const [activeTab, setActiveTab] = useState('Todas');
-  
-  // Estado para el Modal de Ver Detalles
   const [viewingActivity, setViewingActivity] = useState<any | null>(null);
-  
-  // Estados para el Modal del Formulario (Crear/Editar)
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingActivity, setEditingActivity] = useState<any | null>(null);
 
   // 3. Lógica de filtrado
   const filteredActivities = activities.filter(act => {
@@ -77,23 +74,6 @@ export default function ActividadesPage() {
     if (activeTab === 'Capacitaciones') return act.type === 'Capacitación';
     return true;
   });
-
-  // Funciones para manejar los modales
-  const handleCreateNew = () => {
-    setEditingActivity(null); 
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (act: any) => {
-    setEditingActivity(act); 
-    setIsFormOpen(true);
-  };
-
-  const handleSaveForm = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('En la Fase 2, esto guardará los datos en la base de datos de Nest.js.');
-    setIsFormOpen(false); 
-  };
 
   return (
     <div className="fade-in relative">
@@ -128,22 +108,26 @@ export default function ActividadesPage() {
             </button>
           </div>
 
-          <button 
-            onClick={handleCreateNew}
+          {/* NUEVA ACTIVIDAD */}
+          <Link 
+            href="/admin/actividades/nueva"
             className="bg-brand-magenta text-white px-5 py-2.5 rounded-lg hover:bg-purple-800 transition shadow-md flex items-center gap-2 text-sm font-bold shrink-0"
           >
             <i className="fas fa-plus"></i> Crear Actividad
-          </button>
+          </Link>
         </div>
 
         {/* Lista de Actividades */}
         <div className="space-y-4">
           {filteredActivities.length > 0 ? (
             filteredActivities.map((act) => (
-              <div key={act.id} className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-gray-50 hover:shadow-sm transition duration-300 gap-4 group">
-                
+              <div 
+                key={act.id} 
+                onClick={() => setViewingActivity(act)}
+                className="border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-gray-50 hover:shadow-md transition duration-300 gap-4 group cursor-pointer"
+              >
                 <div className="flex items-start sm:items-center gap-4">
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center shrink-0 shadow-inner ${act.iconBg} ${act.iconColor}`}>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center shrink-0 shadow-inner ${act.iconBg} ${act.iconColor} group-hover:scale-105 transition-transform`}>
                     <i className={`fas ${act.icon} text-2xl`}></i>
                   </div>
                   <div>
@@ -160,29 +144,10 @@ export default function ActividadesPage() {
                     </div>
                   </div>
                 </div>
-
-                <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-0 border-gray-100 pt-3 sm:pt-0 mt-2 sm:mt-0">
-                  <button 
-                    onClick={() => setViewingActivity(act)}
-                    className="p-2.5 text-gray-400 hover:text-brand-magenta hover:bg-purple-50 transition rounded-lg border border-transparent hover:border-purple-100" 
-                    title="Ver Detalles"
-                  >
-                    <i className="fas fa-eye"></i>
-                  </button>
-                  <button 
-                    onClick={() => handleEdit(act)}
-                    className="p-2.5 text-gray-400 hover:text-brand-teal hover:bg-blue-50 transition rounded-lg border border-transparent hover:border-blue-100" 
-                    title="Editar"
-                  >
-                    <i className="fas fa-pen"></i>
-                  </button>
-                  <button 
-                    onClick={() => alert(`Viendo lista de inscriptos para: ${act.title}`)}
-                    className="p-2.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 transition rounded-lg border border-transparent hover:border-gray-200" 
-                    title="Ver Inscriptos"
-                  >
-                    <i className="fas fa-users"></i>
-                  </button>
+                
+                {/* Indicador visual sutil de que es cliqueable */}
+                <div className="hidden sm:flex text-gray-300 group-hover:text-brand-teal transition-colors pr-4">
+                  <i className="fas fa-chevron-right"></i>
                 </div>
               </div>
             ))
@@ -250,132 +215,23 @@ export default function ActividadesPage() {
               >
                 Cerrar
               </button>
+
+              {/* VER INSCRIPTOS*/}
               <button 
-                onClick={() => {
-                  setViewingActivity(null); 
-                  handleEdit(viewingActivity); 
-                }}
+                onClick={() => alert(`Viendo lista de inscriptos para: ${viewingActivity.title}`)}
+                className="px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-200 transition shadow-sm"
+              >
+                <i className="fas fa-users mr-2"></i> Ver Inscriptos
+              </button>
+              
+              {/* EDITAR ACTIVIDAD */}
+              <button 
+                onClick={() => router.push(`/admin/actividades/editar/${viewingActivity.id}`)}
                 className="px-6 py-2.5 bg-brand-teal text-white text-sm font-bold rounded-lg hover:bg-brand-dark transition shadow-md"
               >
                 <i className="fas fa-pen mr-2"></i> Editar Actividad
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: FORMULARIO DE CREAR/EDITAR ACTIVIDAD */}
-      {isFormOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm fade-in"
-          onClick={() => setIsFormOpen(false)}
-        >
-          <div 
-            className="bg-white rounded-2xl p-8 max-w-xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={() => setIsFormOpen(false)} 
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:text-gray-800 transition"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-
-            <h3 className="text-2xl font-bold font-heading text-gray-800 mb-6">
-              {editingActivity ? 'Editar Actividad' : 'Nueva Actividad'}
-            </h3>
-
-            <form onSubmit={handleSaveForm}>
-              
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Título de la actividad</label>
-                <input 
-                  type="text" 
-                  defaultValue={editingActivity?.title || ''}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-                  placeholder="Ej: Taller de finanzas..."
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Tipo</label>
-                  <select 
-                    defaultValue={editingActivity?.type || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                    required
-                  >
-                    <option value="" disabled>Seleccionar...</option>
-                    <option value="Convocatoria">Convocatoria</option>
-                    <option value="Capacitación">Capacitación</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Estado</label>
-                  <select 
-                    defaultValue={editingActivity?.status || 'Próximamente'}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal"
-                  >
-                    <option value="Abierta">Abierta / Activa</option>
-                    <option value="Programada">Programada</option>
-                    <option value="Próximamente">Próximamente</option>
-                    <option value="Finalizada">Finalizada / Cerrada</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
-                <textarea 
-                  defaultValue={editingActivity?.desc || ''}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal resize-none" 
-                  placeholder="Describe brevemente el objetivo y a quién está dirigido..."
-                  required
-                ></textarea>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Etiqueta de Fecha</label>
-                  <input 
-                    type="text" 
-                    defaultValue={editingActivity?.dateLabel || 'Fecha'}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal" 
-                    placeholder="Ej: Cierra, Fecha, Inicia..."
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Fecha</label>
-                  <input 
-                    type="text" 
-                    defaultValue={editingActivity?.date || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal" 
-                    placeholder="DD/MM/YYYY"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button 
-                  type="button"
-                  onClick={() => setIsFormOpen(false)}
-                  className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit"
-                  className="px-6 py-2.5 bg-brand-magenta text-white text-sm font-bold rounded-lg hover:bg-purple-800 transition shadow-md"
-                >
-                  {editingActivity ? 'Guardar Cambios' : 'Crear Actividad'}
-                </button>
-              </div>
-
-            </form>
           </div>
         </div>
       )}

@@ -678,7 +678,14 @@ values
 insert into `User`(email, `password`)
 values 
 ('wenceslaomateos@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),/*1234*/
+('rrii.atlantis@mdp.edu.ar','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),/*1234*/
 ('paulabonifazi@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm');
+
+insert into UsersXRol(id_user, id_role)
+values
+(1, 1),
+(2, 1),
+(3, 1);
 
 INSERT INTO `Role`(`name`, `public`, `description`)
 VALUES 

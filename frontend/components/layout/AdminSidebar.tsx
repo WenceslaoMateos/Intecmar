@@ -26,7 +26,7 @@ export const AdminSidebar = () => {
           width={180} 
           height={48} 
           priority 
-          className="object-contain" 
+          className="object-contain  h-auto w-auto" 
         />
       </Link>
 

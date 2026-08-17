@@ -880,7 +880,7 @@ CREATE PROCEDURE userExists(
 )
 BEGIN
 
-    SELECT u.email, u.password
+    SELECT u.id_user, u.email, u.password
     FROM `User` u 
     WHERE u.email = p_email;
 END $$
@@ -1018,7 +1018,7 @@ BEGIN
         r.id_role,
         r.name,
         r.description
-    FROM `user` u
+    FROM `User` u
     INNER JOIN `UsersXRol` ur ON ur.id_user = u.id_user
     INNER JOIN `Role` r ON r.id_role = ur.id_role
     WHERE ur.id_user = p_id_user;

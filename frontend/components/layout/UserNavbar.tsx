@@ -8,11 +8,12 @@ import Image from 'next/image';
 export const UserNavbar = () => {
   const pathname = usePathname();
   const router = useRouter(); 
-  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const getRoleFromToken = () => {
+    const checkUserRole = async () => {
       try {
         const cookies = document.cookie.split(';');
         const tokenCookie = cookies.find(c => c.trim().startsWith('auth_token='));
@@ -21,23 +22,28 @@ export const UserNavbar = () => {
           const token = tokenCookie.split('=')[1];
           const payloadBase64 = token.split('.')[1];
           const decodedPayload = JSON.parse(atob(payloadBase64));
-          
-          // ==========================================
-          // DEBUGGING CLAVE PARA TU TESIS
-          // Abre la consola del navegador (F12) para ver la estructura exacta del token
-          // ==========================================
-          console.log("Payload del JWT:", decodedPayload);
-          
-          // Ajusta '.role' por la propiedad exacta que muestre el console.log
-          // Por ejemplo: podría ser decodedPayload.role_name o decodedPayload.rol
-          setUserRole(decodedPayload.role); 
+          const userId = decodedPayload.id_user || decodedPayload.sub; 
+
+          if (userId) {
+            const response = await fetch(`http://localhost:3000/roles/${userId}`, {
+              headers: {
+                'Authorization': `Bearer ${token}` 
+              }
+            });
+
+            if (response.ok) {
+              const roles = await response.json();
+              const hasAdminRole = roles.some((r: any) => r.name === 'Administrador' || r.id_role === 1);
+              setIsAdmin(hasAdminRole);
+            }
+          }
         }
       } catch (err: any) {
-        setError(err.message || 'Error al decodificar el token.');
+        setError(err.message || 'Error al decodificar el token o verificar roles.');
       }
     };
 
-    getRoleFromToken();
+    checkUserRole();
   }, []);
 
   const isActive = (path: string) => {
@@ -57,14 +63,14 @@ export const UserNavbar = () => {
           
           {/* Lado Izquierdo: Logo & Buscador */}
           <div className="flex items-center gap-4 h-full">
-            <Link href="/explorar" className="flex items-center cursor-pointer h-full">
+            <Link href="/" className="flex items-center cursor-pointer h-full">
               <Image 
                 src="/red-intecmar.png" 
                 alt="Logo de Red Intecmar"
                 width={180} 
                 height={64}
                 priority 
-                className="object-contain min-w-[111px] h-full" 
+                className="object-contain min-w-[111px] h-full w-auto" 
               />
             </Link>
             
@@ -80,12 +86,13 @@ export const UserNavbar = () => {
 
           {/* Lado Derecho: Iconos de Navegación */}
           <ul className="flex items-center gap-1 sm:gap-6 text-gray-500">
-            
-            {/* Ícono Admin: visible solo para administradores */}
+
+
+            {/* Renderizado Condicional: Botón de Administrador si el usuario tiene dicho rol*/}
             <li className="pl-2 sm:pl-4 min-w-[90px] flex justify-center">
-              {userRole === 'Administrador' && (
+              {isAdmin && (
                 <Link 
-                  href="/admin/dashboard" 
+                  href="/admin" 
                   className="flex items-center justify-center px-4 py-1.5 rounded-full bg-purple-100 border border-purple-300 hover:bg-purple-200 transition cursor-pointer text-purple-800 font-bold text-xs shadow-sm"
                   title="Panel de Control del Sistema"
                 >

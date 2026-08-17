@@ -68,7 +68,6 @@ export default function PerfilPage() {
                 </p>
               </div>
               
-              {/* ACÁ ESTÁ EL CAMBIO: Reemplazamos el button por Link */}
               <Link 
                 href="/perfil/editar"
                 className="text-brand-teal border border-brand-teal px-5 py-1.5 rounded-full font-bold hover:bg-brand-teal hover:text-white transition text-sm flex items-center shadow-sm shrink-0"

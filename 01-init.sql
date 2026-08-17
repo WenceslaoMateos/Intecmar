@@ -155,6 +155,22 @@ create table frequencyOfParticipation(
     PRIMARY KEY (id_frequencyOfParticipation)
 );
 
+create table productiveSectorCategory (
+    id_productiveSectorCategory INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    `description` text,
+    PRIMARY KEY (id_productiveSectorCategory)
+);
+
+create table productiveSector (
+    id_productiveSector INT AUTO_INCREMENT,
+    id_productiveSectorCategory int,
+    `name` varchar(255) not null,
+    `description` text,
+    PRIMARY KEY (id_productiveSector),
+    FOREIGN KEY (id_productiveSectorCategory) REFERENCES productiveSectorCategory(id_productiveSectorCategory)
+);
+
 CREATE TABLE institution (
     id_institution INT AUTO_INCREMENT,
     `name` varchar(255) not null,
@@ -162,7 +178,7 @@ CREATE TABLE institution (
     province varchar(2),
     county varchar(5),
     city varchar(11),
-    address varchar(255),
+    `address` varchar(255),
     email varchar(255),
     phoneNumber varchar(20),
     website varchar(255),
@@ -175,13 +191,17 @@ CREATE TABLE institution (
     id_frequencyOfParticipation int,
     hasInterestInParticipating boolean,
     acceptDataUsage boolean,
+    InstitutionalRepresentative int,
+    id_productiveSector int,
     PRIMARY KEY (id_institution),
     FOREIGN KEY (country) REFERENCES Country(id_country),
     FOREIGN KEY (province) REFERENCES Province(id_province),
     FOREIGN KEY (county) REFERENCES County(id_county),
     FOREIGN KEY (city) REFERENCES City(id_city),
     FOREIGN KEY (id_serviceCost) REFERENCES serviceCost(id_serviceCost),
-    FOREIGN KEY (id_frequencyOfParticipation) REFERENCES frequencyOfParticipation(id_frequencyOfParticipation)
+    FOREIGN KEY (id_frequencyOfParticipation) REFERENCES frequencyOfParticipation(id_frequencyOfParticipation),
+    FOREIGN KEY (InstitutionalRepresentative) REFERENCES `User`(id_user),
+    FOREIGN KEY (id_productiveSector) REFERENCES productiveSector(id_productiveSector)
 );
 
 create table institutionXStepOfAssistance (
@@ -209,22 +229,6 @@ create table institutionXInstitutionType (
     PRIMARY KEY (id_institutionXinstitutionType),
     FOREIGN KEY (id_institution) REFERENCES institution(id_institution),
     FOREIGN KEY (id_institutionType) REFERENCES institutionType(id_institutionType)
-);
-
-create table productiveSectorCategory (
-    id_productiveSectorCategory INT AUTO_INCREMENT,
-    `name` varchar(255) not null,
-    `description` text,
-    PRIMARY KEY (id_productiveSectorCategory)
-);
-
-create table productiveSector (
-    id_productiveSector INT AUTO_INCREMENT,
-    id_productiveSectorCategory int,
-    `name` varchar(255) not null,
-    `description` text,
-    PRIMARY KEY (id_productiveSector),
-    FOREIGN KEY (id_productiveSectorCategory) REFERENCES productiveSectorCategory(id_productiveSectorCategory)
 );
 
 create table technologicalMaturity (
@@ -262,6 +266,24 @@ create table intelectualPropertyType (
     PRIMARY KEY (id_intelectualPropertyType)
 );
 
+create table tripleImpactGroup (
+    id_groupTripleImpact INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    PRIMARY KEY (id_groupTripleImpact)
+);
+
+create table tripleImpactImpact (
+    id_impactTripleImpact INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    PRIMARY KEY (id_impactTripleImpact)
+);
+
+create table tripleImpactPurpose (
+    id_purposeTripleImpact INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    PRIMARY KEY (id_purposeTripleImpact)
+);
+
 CREATE TABLE project (
     id_project INT AUTO_INCREMENT,
     `name` varchar(255) not null,
@@ -290,6 +312,14 @@ CREATE TABLE project (
     county varchar(5),
     city varchar(11),
     partnerCount int,
+    productionMembersCount int,
+    sellMembersCount int,
+    administrativeMembersCount int,
+    technologyMembersCount int,
+    otherMembersCount int,
+    roleDescriptionMembers text,
+    teamExperience text,
+    vinculationWithOtherInstitutions text,
     id_productiveSector int,
     necessityIsValidated boolean,
     marketIsSegmented boolean,
@@ -302,16 +332,25 @@ CREATE TABLE project (
     hasPlant boolean,
     needResources boolean,
     id_technologicalMaturity int,
+    maturityDescription text,
     id_degreeOfProgress int,
+    marketStudyFileName varchar(255),
+    projectSacalability int,
     obtainedResults text,
     id_innovationDegree int,
     isTripleImpact boolean,
+    id_groupTripleImpact int,
+    id_impactTripleImpact int,
+    id_purposeTripleImpact int,
     economicImpact text,
     socialImpact text,
     environmentalImpact text,
+    intelectualPropertyFileName varchar(255),
     hasFirstSale boolean,
     recurringClients int,
-    hasInstitucionalSupport boolean,
+    institutionsSupporting text,
+    institutionsFinancing text,
+    legalRepresentative JSON,
     PRIMARY KEY (id_project),
     FOREIGN KEY (id_projectCategory) REFERENCES projectCategories(id_projectCategory),
     FOREIGN KEY (id_enterpriseType) REFERENCES enterpriseTypes(id_enterpriseType),
@@ -323,6 +362,49 @@ CREATE TABLE project (
     FOREIGN KEY (id_technologicalMaturity) REFERENCES technologicalMaturity(id_technologicalMaturity),
     FOREIGN KEY (id_degreeOfProgress) REFERENCES degreeOfProgress(id_degreeOfProgress),
     FOREIGN KEY (id_innovationDegree) REFERENCES innovationDegree(id_innovationDegree)
+);
+
+create table projectXInstitution (
+    id_projectXinstitution INT AUTO_INCREMENT,
+    id_project INT,
+    id_institution INT,
+    PRIMARY KEY (id_projectXinstitution),
+    FOREIGN KEY (id_project) REFERENCES project(id_project),
+    FOREIGN KEY (id_institution) REFERENCES institution(id_institution)
+);
+
+create table projectAdvance (
+    id_projectAdvance INT AUTO_INCREMENT,
+    id_project INT,
+    fileName varchar(255),
+    description text,
+    PRIMARY KEY (id_projectAdvance),
+    FOREIGN KEY (id_project) REFERENCES project(id_project)
+);
+
+create table projectPatentInformation (
+    id_projectPatentInformation INT AUTO_INCREMENT,
+    id_project INT,
+    fileName varchar(255),
+    description text,
+    PRIMARY KEY (id_projectPatentInformation),
+    FOREIGN KEY (id_project) REFERENCES project(id_project)
+);
+
+create table currentNeeds (
+    id_currentNeeds INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    `description` text,
+    PRIMARY KEY (id_currentNeeds)
+);
+
+create table projectXCurrentNeeds (
+    id_projectCurrentNeeds INT AUTO_INCREMENT,
+    id_project INT,
+    id_currentNeeds INT,
+    PRIMARY KEY (id_projectCurrentNeeds),
+    FOREIGN KEY (id_project) REFERENCES project(id_project),
+    FOREIGN KEY (id_currentNeeds) REFERENCES currentNeeds(id_currentNeeds)
 );
 
 create table projectMember(
@@ -402,6 +484,7 @@ create table program(
     duration real,
     timeOfBegining time,
     timeOfEnding time,
+    generalObjective text,
     PRIMARY KEY (id_program),
     FOREIGN KEY (id_state) REFERENCES states(id_state),
     FOREIGN KEY (leadInstitution) REFERENCES institution(id_institution),
@@ -409,11 +492,17 @@ create table program(
     FOREIGN KEY (id_frequency) REFERENCES frequency(id_frequency)
 );
 
-create table objective(
-    id_objective INT AUTO_INCREMENT,
+create table activityType(
+    id_activityType INT AUTO_INCREMENT,
+    `name` varchar(255) not null,
+    PRIMARY KEY (id_activityType)
+);
+
+create table specificObjective(
+    id_specificObjective INT AUTO_INCREMENT,
     id_program INT,
     `description` text,
-    PRIMARY KEY (id_objective),
+    PRIMARY KEY (id_specificObjective),
     FOREIGN KEY (id_program) REFERENCES program(id_program)
 );
 
@@ -681,12 +770,6 @@ values
 ('rrii.atlantis@mdp.edu.ar','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm'),/*1234*/
 ('paulabonifazi@gmail.com','$2b$10$jgJ7Gkx/RaENMCptjjbr4.CwGAJhmzJEJqYhVA6WxmQoMgh4RIwfm');
 
-insert into UsersXRol(id_user, id_role)
-values
-(1, 1),
-(2, 1),
-(3, 1);
-
 INSERT INTO `Role`(`name`, `public`, `description`)
 VALUES 
 ('Administrador', false, 'Usuario con permisos de administración'),
@@ -705,6 +788,12 @@ VALUES
 ('Referente Institucional', true, 'Representa y articula desde una organización dentro del ecosistema.'),
 ('Evaluador/a', true, 'Participa en la evaluación de projectos, programas o convocatorias.'),
 ('Otro', true, 'Rol diverso dentro del ecosistema emprendedor que no encaja en las categorías anteriores.');
+
+insert into UsersXRol(id_user, id_role)
+values
+(1, 1),
+(2, 1),
+(3, 1);
 
 insert into Gender(description)
 values
@@ -741,6 +830,47 @@ values
 ('Fundación Bolsa de Comercio MDP'),
 ('Consejo Profesional de Ciencias Económicas - Buenos Aires'),
 ('Otro');
+
+insert into tripleImpactGroup(`name`)
+values
+('Sin participación'),
+('Participación reducida'),
+('Participación activa');
+
+insert into tripleImpactImpact(`name`)
+values
+('Sin impacto'),
+('Impacto reducido'),
+('Con impacto sostenido');
+
+insert into tripleImpactPurpose(`name`)
+values
+('No menciona'),
+('Los incorpora'),
+('Explícitos en la misión');
+
+insert into currentNeeds(`name`)
+values
+('Asesoramiento en la gestión del emprendimiento (acompañamiento / tutoría)'),
+('Presentación a líneas de financiamiento (créditos, programas públicos / subsidios)'),
+('Búsqueda de información y contactos (proveedores, centros técnicos, grupos de investigación, etc.)'),
+('Capacitaciones'),
+('No necesito asesoramiento'),
+('Otros');
+
+insert into activityType(`name`)
+values
+('Formación de Formadores'),
+('Taller para Promotores'),
+('Curso de Posgrado Consultoría'),
+('Taller Formación Tutores'),
+('Taller Tutores Financiamiento'),
+('Sesiones de mentoría individual y grupal'),
+('Foro de Capital Emprendedor'),
+('Ronda de Vinculación'),
+('Demo Day'),
+('Charlas para Inversores');
+
 
 
 DELIMITER $$
@@ -842,6 +972,56 @@ BEGIN
         `name`
     FROM City
     WHERE id_county = p_id_county;
+END $$
+
+create procedure getUserData(
+    IN p_id_user INT
+)
+BEGIN
+    SELECT 
+        u.id_user,
+        u.email,
+        u.firstName,
+        u.lastName,
+        u.birthDate,
+        u.cuilCuit,
+        u.documentType,
+        u.numberDocument,
+        u.gender,
+        u.cvFileName,
+        u.address,
+        u.country,
+        u.province,
+        u.county,
+        u.city,
+        dt.description as documentTypeDescription,
+        g.description as genderDescription,
+        c.name as countryName,
+        p.name as provinceName,
+        co.name as countyName,
+        ci.name as cityName
+    FROM `User` u
+        inner join documentType dt on u.documentType = dt.id_DocumentType
+        inner join Gender g on u.gender = g.id_gender
+        inner join Country c on u.country = c.id_country
+        inner join Province p on u.province = p.id_province
+        inner join County co on u.county = co.id_county
+        inner join City ci on u.city = ci.id_city
+    WHERE u.id_user = p_id_user;
+END $$
+
+create procedure listUserRoles(
+    IN p_id_user INT
+)
+BEGIN
+    SELECT  
+        r.id_role,
+        r.name,
+        r.description
+    FROM `user` u
+    INNER JOIN `UsersXRol` ur ON ur.id_user = u.id_user
+    INNER JOIN `Role` r ON r.id_role = ur.id_role
+    WHERE ur.id_user = p_id_user;
 END $$
 
 DELIMITER ;

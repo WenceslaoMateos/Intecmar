@@ -31,6 +31,11 @@ export class AppController {
     return this.appService.getRoles();
   }
 
+  @Get('roles/:id')
+  getUserRoles(@Param('id') id: number) {
+    return this.appService.getUserRoles(id);
+  }
+
   @Get('type_documents')
   getDocumentTypes() {
     return this.appService.getDocumentTypes();
@@ -64,5 +69,10 @@ export class AppController {
   @Get('cities/:countyId')
   getCitiesByCounty(@Param('countyId') countyId: string) {
     return this.appService.getCitiesByCounty(countyId);
+  }
+
+  @Get('user/:id')
+  getUser(@Param('id') id: number) {
+    return this.appService.getUserData(id);
   }
 }

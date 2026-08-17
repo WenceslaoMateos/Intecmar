@@ -6,7 +6,6 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   return (
-    // Fondo gris clarito tipo red social (LinkedIn style) y contenedor flex
     <div className="bg-[#f3f2ef] min-h-screen flex flex-col">
       
       {/* Barra superior fija (Navbar) */}
